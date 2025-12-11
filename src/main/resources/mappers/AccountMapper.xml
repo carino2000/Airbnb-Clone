@@ -4,5 +4,24 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.airbnb.mappers.AccountMapper">
 
+    <insert id="insertOne" parameterType="Account">
+        insert into account(id, pw, name, email, phone_number, interest_location)
+        values(#{id}, #{pw}, #{name}, #{email}, #{phoneNumber}, #{interestLocation})
+    </insert>
+
+
+    <select id="countDuplicateId" resultType="int" parameterType="string">
+        select count(*) as cnt from account where id=#{id};
+    </select>
+
+    <select id="selectById" parameterType="string">
+        select * from account where id=#{id}
+    </select>
+
+    <update id="updateAccountInfo" parameterType="Account">
+        update account set name=#{name}, email=#{email}, phone_number=#{phoneNumber}, interest_location=#{interestLocation} where id=#{id}
+    </update>
+
+
 
 </mapper>
