@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.airbnb.mappers.VerificationMapper">
+
+    <insert id="insertOne" parameterType="Verification">
+        insert into verification(email, code, expired_at)
+        values (#{email}, #{code}, #{expiredAt})
+    </insert>
+
+    <select id="selectLatestByEmail" parameterType="String" resultType="Verification">
+        select * from verification where email=#{email} order by expired_at desc limit 1
+    </select>
+
+</mapper>
