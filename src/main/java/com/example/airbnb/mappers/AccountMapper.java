@@ -10,4 +10,5 @@ public interface AccountMapper {
     int countDuplicateEmail (String email);
     Account selectById(String id);
     int updateAccountInfo(Account account);
+    int deleteAccountById(String id);
 }
