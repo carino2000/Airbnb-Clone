@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/accounts")
 @RequiredArgsConstructor
 @CrossOrigin
 public class AccountController {
@@ -89,8 +89,9 @@ public class AccountController {
         return resp;
     }
 
-    @PostMapping("/edit/profile")
-    public AccountResponse editProfile(@RequestBody @Valid EditProfileRequest epr, BindingResult bindingResult) {
+    @PutMapping("/{accountId}")
+    public AccountResponse editProfile(@RequestBody @Valid EditProfileRequest epr, BindingResult bindingResult,
+                                       @PathVariable String accountId) {
         AccountResponse resp = new AccountResponse();
         resp.setSuccess(false);
         if (bindingResult.hasErrors()) {
@@ -99,7 +100,7 @@ public class AccountController {
             return resp;
         }
 
-        if (accountMapper.updateAccountInfo(epr.toAccount()) != 1) {
+        if (accountMapper.updateAccountInfo(epr.toAccount(accountId)) != 1) {
             resp.setMessage("editProfile Failed");
         } else {
             resp.setSuccess(true);

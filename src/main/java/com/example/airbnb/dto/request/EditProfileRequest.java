@@ -12,8 +12,6 @@ import java.time.LocalDateTime;
 @Setter
 public class EditProfileRequest {
     @NotBlank
-    String id;
-    @NotBlank
     String name;
     @NotBlank
     @Email
@@ -21,9 +19,9 @@ public class EditProfileRequest {
     String phoneNumber;
     String interestLocation;
 
-    public Account toAccount() {
+    public Account toAccount(String accountId) {
         Account account = new Account();
-        account.setId(this.id);
+        account.setId(accountId);
         account.setName(this.name);
         account.setEmail(this.email);
         account.setPhoneNumber(this.phoneNumber == null ? "" : this.phoneNumber);
