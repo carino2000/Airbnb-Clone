@@ -16,4 +16,8 @@
         select * from reservation where code=#{code}
     </select>
 
+    <select id="countDuplicateDate" parameterType="ReservationDateParam">
+        select count(*) as cnt from reservation_date where accommodation_id=#{accommodationId} and date between #{startDate} and #{endDate};
+    </select>
+
 </mapper>

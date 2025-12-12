@@ -1,6 +1,7 @@
 package com.example.airbnb.dto.request;
 
 import com.example.airbnb.domain.entity.Reservation;
+import com.example.airbnb.domain.model.ReservationDateParam;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,14 @@ public class NewReservationRequest {
     LocalDate endDate;
     @NotBlank
     int price;
+
+    public ReservationDateParam toParam() {
+        ReservationDateParam rpd = new ReservationDateParam();
+        rpd.setAccommodationId(this.accommodationId);
+        rpd.setStartDate(this.startDate);
+        rpd.setEndDate(this.endDate);
+        return rpd;
+    }
 
     public Reservation toReservation(String code) {
         Reservation reservation = new Reservation();
