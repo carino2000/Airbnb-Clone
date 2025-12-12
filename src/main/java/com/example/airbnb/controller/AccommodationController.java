@@ -5,10 +5,12 @@ import com.example.airbnb.dto.request.AccommodationRequest;
 import com.example.airbnb.dto.response.AccommodationResponse;
 import com.example.airbnb.mappers.AccommodationMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin
 @RestController
@@ -52,8 +54,27 @@ public class AccommodationController {
 
     // 숙소 상세 조회
     @GetMapping("/{accommodationId}")
-    public String getAccommodationDetails() {
-        return "숙소 상세 조회";
+    public AccommodationResponse selectAccommodationById(@PathVariable int accommodationId) {
+
+        Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
+
+        AccommodationResponse accommodationResponse = AccommodationResponse.builder()
+                .id(accommodation.getId())
+                .hostId(accommodation.getHostId())
+                .name(accommodation.getName())
+                .description(accommodation.getDescription())
+                .price(accommodation.getPrice())
+                .address(accommodation.getAddress())
+                .extraRate(accommodation.getExtraRate())
+                .maxCapacity(accommodation.getMaxCapacity())
+                .bedroom(accommodation.getBedroom())
+                .bed(accommodation.getBed())
+                .bathroom(accommodation.getBathroom())
+                .success(true)
+                .build();
+
+        return accommodationResponse;
+
     }
 
     // 숙소 생성
