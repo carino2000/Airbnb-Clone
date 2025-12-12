@@ -25,7 +25,7 @@ public class JWTVerifyFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest req) throws ServletException {
         String uri = req.getRequestURI();
-        return uri.startsWith("/account") || uri.startsWith("/validate") || req.getMethod().equals("OPTIONS");
+        return uri.startsWith("/accounts/register") || uri.startsWith("/accounts/login") || uri.startsWith("/validate") || req.getMethod().equals("OPTIONS");
     }
 
     @Override
@@ -50,7 +50,7 @@ public class JWTVerifyFilter extends OncePerRequestFilter {
             return;
         }
         String sub = jwt.getSubject();
-        req.setAttribute("tokenId", Integer.parseInt(sub));
+        req.setAttribute("tokenId", sub);
         filterChain.doFilter(req, resp);
     }
 }
