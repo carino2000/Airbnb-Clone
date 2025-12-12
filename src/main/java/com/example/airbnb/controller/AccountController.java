@@ -95,7 +95,7 @@ public class AccountController {
         return resp;
     }
 
-    @PatchMapping("/{accountId}")
+    @PutMapping("/{accountId}")
     public AccountResponse editProfile(@RequestBody @Valid EditProfileRequest epr, BindingResult bindingResult,
                                        @PathVariable String accountId,
                                        @RequestAttribute String tokenId) {
@@ -149,4 +149,8 @@ public class AccountController {
     }
 
 
+    @PutMapping("/{accountId}/password")
+    public void editPassword(){
+
+    }
 }
