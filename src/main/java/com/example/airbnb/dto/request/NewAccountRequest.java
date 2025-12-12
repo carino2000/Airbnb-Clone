@@ -37,7 +37,7 @@ public class NewAccountRequest {
         account.setName(this.name);
         account.setEmail(this.email);
         account.setPhoneNumber(this.phoneNumber == null ? "" : this.phoneNumber);
-        account.setInterestLocation(this.interestLocation ==  null ? "" : this.interestLocation);
-        return  account;
+        account.setInterestLocation(this.interestLocation == null ? "" : this.interestLocation);
+        return account;
     }
 }

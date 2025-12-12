@@ -4,5 +4,16 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.airbnb.mappers.ReservationMapper">
 
+    <insert id="insertOne" parameterType="Reservation">
+        insert into reservation(code, accommodation_id, account_id, visitors, start_date, end_date, price)
+        values (#{code}, #{accommodationId}, #{accountId}, #{visitors}, #{startDate}, #{endDate}, #{price})
+    </insert>
+    <insert id="insertReservationDate" parameterType="ReservationDate">
+        insert into reservation_date (accommodation_id, date) values(#{accommodationId}, #{date})
+    </insert>
+
+    <select id="selectOne" parameterType="string" resultType="Reservation">
+        select * from reservation where code=#{code}
+    </select>
 
 </mapper>

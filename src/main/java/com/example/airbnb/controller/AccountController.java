@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -36,7 +37,12 @@ public class AccountController {
         resp.setSuccess(false);
 
         if (bindingResult.hasErrors()) {
-            resp.setMessage("정규식 오류 : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+            FieldError fe = bindingResult.getFieldError();
+            if (fe != null) {
+                resp.setMessage(fe.getField() +" 필드의 Valid 오류 : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+            }else{
+                resp.setMessage("unexpected error : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+            }
             System.out.println("Error in createAccount: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             return resp;
         }
@@ -109,7 +115,12 @@ public class AccountController {
         }
 
         if (bindingResult.hasErrors()) {
-            resp.setMessage("정규식 오류 : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+            FieldError fe = bindingResult.getFieldError();
+            if (fe != null) {
+                resp.setMessage(fe.getField() +" 필드의 Valid 오류 : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+            }else{
+                resp.setMessage("unexpected error : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+            }
             System.out.println("Error in editProfile: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             return resp;
         }
