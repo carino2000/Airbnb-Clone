@@ -11,4 +11,9 @@ public class ReservationDate {
     int id;
     int accommodationId;
     LocalDate date;
+
+    public ReservationDate(int accommodationId, LocalDate date) {
+        this.accommodationId = accommodationId;
+        this.date = date;
+    }
 }
