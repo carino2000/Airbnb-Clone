@@ -63,7 +63,6 @@ public class ReservationController {
                 throw new RuntimeException("Error in insert reservation");
             }
 
-            List<ReservationDate> list = new ArrayList<>();
             for (LocalDate d = nrr.getStartDate(); d.isBefore(nrr.getEndDate()) || d.equals(nrr.getEndDate()); d = d.plusDays(1)) {
                 r = reservationMapper.insertReservationDate(new ReservationDate(nrr.getAccommodationId(), d));
                 if (r != 1) {
@@ -72,6 +71,7 @@ public class ReservationController {
             }
             resp.setSuccess(true);
             resp.setMessage("Reservation created");
+            resp.setData(reservation);
         }catch (Exception e){
             resp.setMessage(e.getMessage());
             throw e;
@@ -91,13 +91,13 @@ public class ReservationController {
         if (bindingResult.hasErrors()) {
             FieldError fe = bindingResult.getFieldError();
             if (fe != null) {
-                resp.setMessage(fe.getField() +" 필드의 Valid 오류 : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
-            }else{
-                resp.setMessage("unexpected error : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+                resp.setMessage(fe.getField() + " 필드 오류: " + fe.getDefaultMessage());
+            } else {
+                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             }
-            System.out.println("Error in editPassword: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             return resp;
         }
+
 
         Reservation reservation = reservationMapper.selectOne(code);
         if(reservation == null){
@@ -105,13 +105,16 @@ public class ReservationController {
             return resp;
         }
 
-        if(reservationMapper.countDuplicateDate(reservation.toParam()) > 0){
-            resp.setMessage("ReservationDate Duplicated");
-            return resp;
-        }
+
 
         try{
             reservationMapper.deleteReservationDate(reservation.toParam());
+
+            if(reservationMapper.countDuplicateDate(err.toParam(reservation.getAccommodationId())) > 0){
+                resp.setMessage("ReservationDate Duplicated");
+                return resp;
+            }
+
             ReservationUpdateParam param = new ReservationUpdateParam();
 
             param.setCode(code);
@@ -120,14 +123,23 @@ public class ReservationController {
             param.setEndDate(err.getEndDate());
             param.setPrice(err.getPrice());
 
+            int r = reservationMapper.updateReservation(param);
+            if (r != 1) {
+                throw new RuntimeException("Error in insert reservation");
+            }
 
-
+            for (LocalDate d = err.getStartDate(); d.isBefore(err.getEndDate()) || d.equals(err.getEndDate()); d = d.plusDays(1)) {
+                r = reservationMapper.insertReservationDate(new ReservationDate(reservation.getAccommodationId(), d));
+                if (r != 1) {
+                    throw new RuntimeException("Error in insert reservationDate");
+                }
+            }
+            resp.setSuccess(true);
+            resp.setMessage("Reservation Update");
         }catch (Exception e){
             resp.setMessage(e.getMessage());
             throw e;
         }
-
-
         return resp;
     }
 }

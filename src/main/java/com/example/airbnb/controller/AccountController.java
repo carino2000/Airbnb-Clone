@@ -8,6 +8,7 @@ import com.example.airbnb.dto.request.EditPasswordRequest;
 import com.example.airbnb.dto.request.EditProfileRequest;
 import com.example.airbnb.dto.request.LoginRequest;
 import com.example.airbnb.dto.request.NewAccountRequest;
+import com.example.airbnb.dto.response.AccountLoginResponse;
 import com.example.airbnb.dto.response.AccountResponse;
 import com.example.airbnb.mappers.AccountMapper;
 import com.example.airbnb.mappers.VerificationMapper;
@@ -32,20 +33,20 @@ public class AccountController {
 
     @PostMapping("/register")
     public AccountResponse createAccount(@RequestBody @Valid NewAccountRequest nar,
-                                         BindingResult bindingResult) {
+                                              BindingResult bindingResult) {
         AccountResponse resp = new AccountResponse();
         resp.setSuccess(false);
 
         if (bindingResult.hasErrors()) {
             FieldError fe = bindingResult.getFieldError();
             if (fe != null) {
-                resp.setMessage(fe.getField() +" 필드의 Valid 오류 : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
-            }else{
-                resp.setMessage("unexpected error : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+                resp.setMessage(fe.getField() + " 필드 오류: " + fe.getDefaultMessage());
+            } else {
+                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             }
-            System.out.println("Error in createAccount: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             return resp;
         }
+
 
         Verification verification = verificationMapper.selectLatestByEmail(nar.getEmail());
         if (verification == null) {
@@ -78,8 +79,8 @@ public class AccountController {
 
 
     @PostMapping("/login")
-    public AccountResponse login(@RequestBody LoginRequest lr) {
-        AccountResponse resp = new AccountResponse();
+    public AccountLoginResponse login(@RequestBody LoginRequest lr) {
+        AccountLoginResponse resp = new AccountLoginResponse();
         Account account = accountMapper.selectById(lr.getId());
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         System.out.println(lr.getId());
@@ -105,8 +106,8 @@ public class AccountController {
 
     @PutMapping("/{accountId}")
     public AccountResponse editProfile(@RequestBody @Valid EditProfileRequest epr, BindingResult bindingResult,
-                                       @PathVariable String accountId,
-                                       @RequestAttribute String tokenId) {
+                                            @PathVariable String accountId,
+                                            @RequestAttribute String tokenId) {
         AccountResponse resp = new AccountResponse();
         resp.setSuccess(false);
         if (!tokenId.equals(accountId)) {
@@ -117,13 +118,13 @@ public class AccountController {
         if (bindingResult.hasErrors()) {
             FieldError fe = bindingResult.getFieldError();
             if (fe != null) {
-                resp.setMessage(fe.getField() +" 필드의 Valid 오류 : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
-            }else{
-                resp.setMessage("unexpected error : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+                resp.setMessage(fe.getField() + " 필드 오류: " + fe.getDefaultMessage());
+            } else {
+                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             }
-            System.out.println("Error in editProfile: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             return resp;
         }
+
 
         if (accountMapper.updateAccountInfo(epr.toAccount(accountId)) != 1) {
             resp.setMessage("editProfile Failed");
@@ -137,7 +138,7 @@ public class AccountController {
 
     @DeleteMapping("/{accountId}")
     public AccountResponse deleteAccount(@PathVariable String accountId,
-                                         @RequestAttribute String tokenId) {
+                                              @RequestAttribute String tokenId) {
         AccountResponse resp = new AccountResponse();
         resp.setSuccess(false);
 
@@ -164,8 +165,8 @@ public class AccountController {
 
     @PutMapping("/{accountId}/password")
     public AccountResponse editPassword(@PathVariable String accountId,
-                                        @RequestAttribute String tokenId,
-                                        @RequestBody @Valid EditPasswordRequest epr, BindingResult bindingResult) {
+                                             @RequestAttribute String tokenId,
+                                             @RequestBody @Valid EditPasswordRequest epr, BindingResult bindingResult) {
         AccountResponse resp = new AccountResponse();
         resp.setSuccess(false);
 
@@ -177,13 +178,13 @@ public class AccountController {
         if (bindingResult.hasErrors()) {
             FieldError fe = bindingResult.getFieldError();
             if (fe != null) {
-                resp.setMessage(fe.getField() +" 필드의 Valid 오류 : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
-            }else{
-                resp.setMessage("unexpected error : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+                resp.setMessage(fe.getField() + " 필드 오류: " + fe.getDefaultMessage());
+            } else {
+                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             }
-            System.out.println("Error in editPassword: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             return resp;
         }
+
 
         Account account = accountMapper.selectById(accountId);
         if (account == null) {
