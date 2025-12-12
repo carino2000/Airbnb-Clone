@@ -13,11 +13,11 @@
         insert into accommodation_image (accommodation_id, uri)
         values (#{accommodationId}, #{uri});
     </insert>
-    <insert id="insertAccommodationAmenity" parameterType="AccommodationAmenity" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertAccommodationAmenity" parameterType="Amenities" useGeneratedKeys="true" keyProperty="id">
         insert into amenities (accommodation_id, amenity)
         values (#{accommodationId}, #{amenity});
     </insert>
-    <insert id="insertAccommodationTag" parameterType="AccommodationTag" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertAccommodationTag" parameterType="Tags" useGeneratedKeys="true" keyProperty="id">
         insert into tags (accommodation_id, tag)
         values (#{accommodationId}, #{tag});
     </insert>

@@ -102,6 +102,17 @@ public class AccommodationController {
         return "특정 편의시설에 달린 리뷰 조회";
     }
 
+    //좋아요 조회
+    @GetMapping("/accommodations/likes")
+    public String getAccommodationLikes() {
+        return "좋아요 조회";
+    }
+
+    //좋아요 등록
+    @PostMapping("/accommodations/{accommodationId}/likes")
+    public String addAccommodationLike() {
+        return "좋아요 등록";
+    }
 
 
 }
