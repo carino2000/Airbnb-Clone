@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.airbnb.domain.entity.Account;
 import com.example.airbnb.domain.entity.Verification;
+import com.example.airbnb.dto.request.EditPasswordRequest;
 import com.example.airbnb.dto.request.EditProfileRequest;
 import com.example.airbnb.dto.request.LoginRequest;
 import com.example.airbnb.dto.request.NewAccountRequest;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/accounts")
@@ -101,7 +103,7 @@ public class AccountController {
                                        @RequestAttribute String tokenId) {
         AccountResponse resp = new AccountResponse();
         resp.setSuccess(false);
-        if(!tokenId.equals(accountId)){
+        if (!tokenId.equals(accountId)) {
             resp.setMessage("invalid token");
             return resp;
         }
@@ -128,7 +130,7 @@ public class AccountController {
         AccountResponse resp = new AccountResponse();
         resp.setSuccess(false);
 
-        if(!tokenId.equals(accountId)){
+        if (!tokenId.equals(accountId)) {
             resp.setMessage("invalid token");
             return resp;
         }
@@ -136,10 +138,10 @@ public class AccountController {
         Account account = accountMapper.selectById(accountId);
         if (account == null) {
             resp.setMessage("account not found");
-        }else{
-            if(accountMapper.deleteAccountById(accountId) != 1){
+        } else {
+            if (accountMapper.deleteAccountById(accountId) != 1) {
                 resp.setMessage("delete account failed");
-            }else{
+            } else {
                 resp.setSuccess(true);
                 resp.setMessage("delete successful.");
             }
@@ -150,7 +152,46 @@ public class AccountController {
 
 
     @PutMapping("/{accountId}/password")
-    public void editPassword(){
+    public AccountResponse editPassword(@PathVariable String accountId,
+                                        @RequestAttribute String tokenId,
+                                        @RequestBody @Valid EditPasswordRequest epr, BindingResult bindingResult) {
+        AccountResponse resp = new AccountResponse();
+        resp.setSuccess(false);
 
+        if (!tokenId.equals(accountId)) {
+            resp.setMessage("invalid token");
+            return resp;
+        }
+
+        if (bindingResult.hasErrors()) {
+            resp.setMessage("정규식 오류 : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+            System.out.println("Error in createAccount: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+            return resp;
+        }
+
+        Account account = accountMapper.selectById(accountId);
+        if (account == null) {
+            resp.setMessage("account not found");
+            return resp;
+        }
+
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        if (!passwordEncoder.matches(epr.getOldPw(), account.getPw())) {
+            resp.setMessage("old password is incorrect.");
+        } else if (epr.getOldPw().equals(epr.getNewPw())) {
+            resp.setMessage("already using password.");
+        } else if (epr.getNewPw().equals(epr.getNewPwConfirm())) {
+            resp.setMessage("confirm password does not match.");
+        } else {
+            Map<String, String> map = Map.of("id", accountId, "pw", passwordEncoder.encode(epr.getNewPw()));
+            if (accountMapper.updateAccountPw(map) != 1) {
+                resp.setMessage("update password failed.");
+            } else {
+                resp.setSuccess(true);
+                resp.setMessage("update password successful.");
+            }
+        }
+
+        return resp;
     }
 }

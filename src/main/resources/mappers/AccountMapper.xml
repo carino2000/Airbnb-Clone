@@ -24,6 +24,9 @@
     <update id="updateAccountInfo" parameterType="Account">
         update account set name=#{name}, email=#{email}, phone_number=#{phoneNumber}, interest_location=#{interestLocation} where id=#{id}
     </update>
+    <update id="updateAccountPw" parameterType="map">
+        update account set pw=#{pw} where id=#{id}
+    </update>
 
 
     <delete id="deleteAccountById" parameterType="string">

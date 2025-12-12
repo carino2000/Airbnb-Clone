@@ -14,7 +14,7 @@ public class NewAccountRequest {
     String accountId;
 
     @NotBlank
-    @Pattern(regexp = "(?=.*[a-z])(?=.*\\d).{8,20}")
+    @Pattern(regexp = "(?=.*[a-z])(?=.*\\d).{7,20}")
     String pw;
 
     @NotBlank
