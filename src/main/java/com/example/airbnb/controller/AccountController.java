@@ -45,7 +45,7 @@ public class AccountController {
             return resp;
         }
 
-        if (accountMapper.countDuplicateId(nar.getId()) != 0) { // 닉네임 중복일 때
+        if (accountMapper.countDuplicateId(nar.getAccountId()) != 0) { // 닉네임 중복일 때
             resp.setMessage("duplicate nickname");
             System.out.println(resp.getMessage());
         } else if (!verification.getCode().equals(nar.getCode())) { // 인증코드 불일치
@@ -89,7 +89,7 @@ public class AccountController {
         return resp;
     }
 
-    @PutMapping("/{accountId}")
+    @PatchMapping("/{accountId}")
     public AccountResponse editProfile(@RequestBody @Valid EditProfileRequest epr, BindingResult bindingResult,
                                        @PathVariable String accountId) {
         AccountResponse resp = new AccountResponse();
@@ -109,4 +109,12 @@ public class AccountController {
 
         return resp;
     }
+
+    @DeleteMapping("/{accountId}")
+    public AccountResponse deleteAccount(@PathVariable String accountId) {
+        AccountResponse resp = new AccountResponse();
+        return resp;
+    }
+
+
 }

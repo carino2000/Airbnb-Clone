@@ -35,6 +35,19 @@ public class ValidateController {
         return resp;
     }
 
+    @GetMapping("/email")
+    public DuplicateResponse checkDuplicateEmail(@RequestParam(required = false) String email) {
+        DuplicateResponse resp = new DuplicateResponse();
+        if (accountMapper.countDuplicateEmail(email) == 1) {
+            resp.setDuplicate(true);
+            resp.setMessage("Duplicate Email");
+        } else {
+            resp.setDuplicate(false);
+            resp.setMessage("Available Email");
+        }
+        return resp;
+    }
+
     @PostMapping("/code/send")
     public EmailCodeResponse sendEmailCode(@RequestBody NewEmailCodeRequest necr) {
         String email = necr.getEmail();

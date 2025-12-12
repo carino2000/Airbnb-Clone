@@ -11,7 +11,10 @@
 
 
     <select id="countDuplicateId" resultType="int" parameterType="string">
-        select count(*) as cnt from account where id=#{id};
+        select count(*) as cnt from account where id=#{id}
+    </select>
+    <select id="countDuplicateEmail" resultType="int" parameterType="string">
+        select count(*) as cnt from account where email=#{email}
     </select>
 
     <select id="selectById" parameterType="string">

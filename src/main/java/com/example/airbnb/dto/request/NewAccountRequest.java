@@ -7,13 +7,11 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 public class NewAccountRequest {
     @NotBlank
-    String id;
+    String accountId;
 
     @NotBlank
     @Pattern(regexp = "(?=.*[a-z])(?=.*\\d).{8,20}")
@@ -34,7 +32,7 @@ public class NewAccountRequest {
 
     public Account toAccount(String pw) {
         Account account = new Account();
-        account.setId(this.id);
+        account.setId(this.accountId);
         account.setPw(pw);
         account.setName(this.name);
         account.setEmail(this.email);
