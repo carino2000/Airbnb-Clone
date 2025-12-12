@@ -6,7 +6,6 @@ import com.example.airbnb.dto.response.accommodation.AccommodationEditResponse;
 import com.example.airbnb.dto.response.accommodation.AccommodationSelectAllResponse;
 import com.example.airbnb.dto.response.accommodation.AccommodationCreateResponse;
 import com.example.airbnb.dto.response.accommodation.AccommodationSelectByIdResponse;
-import com.example.airbnb.dto.response.accommodation.TagsResponse;
 import com.example.airbnb.mappers.AccommodationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
