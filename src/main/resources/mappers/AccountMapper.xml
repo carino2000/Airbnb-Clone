@@ -26,5 +26,8 @@
     </update>
 
 
+    <delete id="deleteAccountById" parameterType="string">
+        delete from account where id=#{id}
+    </delete>
 
 </mapper>

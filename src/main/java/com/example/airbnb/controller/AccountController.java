@@ -45,8 +45,8 @@ public class AccountController {
             return resp;
         }
 
-        if (accountMapper.countDuplicateId(nar.getAccountId()) != 0) { // 닉네임 중복일 때
-            resp.setMessage("duplicate nickname");
+        if (accountMapper.countDuplicateId(nar.getAccountId()) != 0) { // 아이디 중복일 때
+            resp.setMessage("duplicate Id");
             System.out.println(resp.getMessage());
         } else if (!verification.getCode().equals(nar.getCode())) { // 인증코드 불일치
             resp.setMessage("verification code failed");
@@ -74,13 +74,19 @@ public class AccountController {
         AccountResponse resp = new AccountResponse();
         Account account = accountMapper.selectById(lr.getId());
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        System.out.println(lr.getId());
+        System.out.println(lr.getPw());
 
         if (account == null || !passwordEncoder.matches(lr.getPw(), account.getPw())) {
             resp.setSuccess(false);
             resp.setMessage("accountId or password is incorrect.");
         } else {
             Algorithm algorithm = Algorithm.HMAC256("f891c04f488d6c66cd4a5e4d9c8c0615");
-            String token = JWT.create().withSubject(String.valueOf(account.getId())).withIssuedAt(new Date()).withIssuer("airbnb").sign(algorithm);
+            String token = JWT.create()
+                    .withSubject(account.getId())
+                    .withIssuedAt(new Date())
+                    .withIssuer("airbnb")
+                    .sign(algorithm);
             resp.setSuccess(true);
             resp.setMessage("login successful.");
             resp.setData(account);
@@ -91,9 +97,15 @@ public class AccountController {
 
     @PatchMapping("/{accountId}")
     public AccountResponse editProfile(@RequestBody @Valid EditProfileRequest epr, BindingResult bindingResult,
-                                       @PathVariable String accountId) {
+                                       @PathVariable String accountId,
+                                       @RequestAttribute String tokenId) {
         AccountResponse resp = new AccountResponse();
         resp.setSuccess(false);
+        if(!tokenId.equals(accountId)){
+            resp.setMessage("invalid token");
+            return resp;
+        }
+
         if (bindingResult.hasErrors()) {
             resp.setMessage("정규식 오류 : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             System.out.println("Error in editProfile: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
@@ -111,8 +123,28 @@ public class AccountController {
     }
 
     @DeleteMapping("/{accountId}")
-    public AccountResponse deleteAccount(@PathVariable String accountId) {
+    public AccountResponse deleteAccount(@PathVariable String accountId,
+                                         @RequestAttribute String tokenId) {
         AccountResponse resp = new AccountResponse();
+        resp.setSuccess(false);
+
+        if(!tokenId.equals(accountId)){
+            resp.setMessage("invalid token");
+            return resp;
+        }
+
+        Account account = accountMapper.selectById(accountId);
+        if (account == null) {
+            resp.setMessage("account not found");
+        }else{
+            if(accountMapper.deleteAccountById(accountId) != 1){
+                resp.setMessage("delete account failed");
+            }else{
+                resp.setSuccess(true);
+                resp.setMessage("delete successful.");
+            }
+        }
+
         return resp;
     }
 

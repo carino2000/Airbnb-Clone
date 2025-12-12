@@ -48,7 +48,7 @@ public class ValidateController {
         return resp;
     }
 
-    @PostMapping("/code/send")
+    @PostMapping("/code")
     public EmailCodeResponse sendEmailCode(@RequestBody NewEmailCodeRequest necr) {
         String email = necr.getEmail();
         int rand = (int) (Math.random() * 100000000);
