@@ -1,18 +1,16 @@
 package com.example.airbnb.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
-
+@AllArgsConstructor
+@NoArgsConstructor
 public class AmenitiesResponse {
     int id;
     int accommodationId;
     String amenity;
 
-    public AmenitiesResponse() {
-    }
+
 }
