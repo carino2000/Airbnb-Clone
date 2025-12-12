@@ -17,7 +17,17 @@
     </select>
 
     <select id="countDuplicateDate" parameterType="ReservationDateParam">
-        select count(*) as cnt from reservation_date where accommodation_id=#{accommodationId} and date between #{startDate} and #{endDate};
+        select count(*) as cnt from reservation_date where accommodation_id=#{accommodationId} and date between #{startDate} and #{endDate}
     </select>
+
+
+
+    <delete id="deleteReservationDate" parameterType="ReservationDateParam">
+        delete from reservation_date where accommodation_id=#{accommodationId} and date between #{startDate} and #{endDate}
+    </delete>
+
+    <update id="updateReservation" parameterType="ReservationUpdateParam">
+        update reservation set visitors=#{visitors}, start_date=#{startDate}, end_date=#{endDate}, price=#{price} where code=#{code}
+    </update>
 
 </mapper>

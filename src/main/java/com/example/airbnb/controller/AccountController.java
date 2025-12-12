@@ -175,8 +175,13 @@ public class AccountController {
         }
 
         if (bindingResult.hasErrors()) {
-            resp.setMessage("정규식 오류 : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
-            System.out.println("Error in createAccount: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+            FieldError fe = bindingResult.getFieldError();
+            if (fe != null) {
+                resp.setMessage(fe.getField() +" 필드의 Valid 오류 : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+            }else{
+                resp.setMessage("unexpected error : " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+            }
+            System.out.println("Error in editPassword: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
             return resp;
         }
 

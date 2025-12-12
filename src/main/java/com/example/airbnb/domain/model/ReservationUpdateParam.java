@@ -1,5 +1,6 @@
 package com.example.airbnb.domain.model;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,10 +8,10 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class ReservationDateParam {
-    int accommodationId;
+public class ReservationUpdateParam {
+    String code;
+    int visitors;
     LocalDate startDate;
     LocalDate endDate;
-
-
+    int price;
 }
