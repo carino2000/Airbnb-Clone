@@ -2,15 +2,15 @@ package com.example.airbnb.controller;
 
 import com.example.airbnb.domain.entity.Accommodation;
 import com.example.airbnb.dto.request.AccommodationRequest;
-import com.example.airbnb.dto.response.AccommodationResponse;
+import com.example.airbnb.dto.response.accommodation.AccommodationEditResponse;
+import com.example.airbnb.dto.response.accommodation.AccommodationSelectAllResponse;
+import com.example.airbnb.dto.response.accommodation.AccommodationCreateResponse;
+import com.example.airbnb.dto.response.accommodation.AccommodationSelectByIdResponse;
 import com.example.airbnb.mappers.AccommodationMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @CrossOrigin
 @RestController
@@ -19,67 +19,37 @@ import java.util.Map;
 public class AccommodationController {
     private final AccommodationMapper accommodationMapper;
 
-    // 숙소 전체 조회
+    // 숙소 전체 조회(검색)
     @GetMapping
-    public List<AccommodationResponse> selectAllAccommodations(@RequestParam (required = false) String name,
-                                       @RequestParam (required = false) Integer priceMin,
-                                       @RequestParam (required = false) Integer priceMax,
-                                       @RequestParam (required = false) String address) {
+    public AccommodationSelectAllResponse selectAllAccommodations(@RequestParam (required = false) String name,
+                                                                  @RequestParam (required = false) Integer priceMin,
+                                                                  @RequestParam (required = false) Integer priceMax,
+                                                                  @RequestParam (required = false) String address) {
 
         List<Accommodation> accommodations = accommodationMapper.selectAllAccommodations();
 
-
-        List<AccommodationResponse> accommodationResponse = new ArrayList<>();
-        for (Accommodation a : accommodations) {
-            AccommodationResponse resp = AccommodationResponse.builder()
-                    .id(a.getId())
-                    .hostId(a.getHostId())
-                    .name(a.getName())
-                    .description(a.getDescription())
-                    .price(a.getPrice())
-                    .address(a.getAddress())
-                    .extraRate(a.getExtraRate())
-                    .maxCapacity(a.getMaxCapacity())
-                    .bedroom(a.getBedroom())
-                    .bed(a.getBed())
-                    .bathroom(a.getBathroom())
-                    .success(true)
-                    .build();
-            accommodationResponse.add(resp);
-        }
-
-        return accommodationResponse;
+        return AccommodationSelectAllResponse.builder().success(true).accommodations(accommodations).build();
     }
 
 
     // 숙소 상세 조회
     @GetMapping("/{accommodationId}")
-    public AccommodationResponse selectAccommodationById(@PathVariable int accommodationId) {
+    public AccommodationSelectByIdResponse selectAccommodationById(@PathVariable int accommodationId) {
 
         Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
 
-        AccommodationResponse accommodationResponse = AccommodationResponse.builder()
-                .id(accommodation.getId())
-                .hostId(accommodation.getHostId())
-                .name(accommodation.getName())
-                .description(accommodation.getDescription())
-                .price(accommodation.getPrice())
-                .address(accommodation.getAddress())
-                .extraRate(accommodation.getExtraRate())
-                .maxCapacity(accommodation.getMaxCapacity())
-                .bedroom(accommodation.getBedroom())
-                .bed(accommodation.getBed())
-                .bathroom(accommodation.getBathroom())
+        return AccommodationSelectByIdResponse.builder()
+                .accommodation(accommodation)
                 .success(true)
                 .build();
 
-        return accommodationResponse;
+
 
     }
 
     // 숙소 생성
     @PostMapping
-    public AccommodationResponse createAccommodation(@RequestBody AccommodationRequest accommodationRequest) {
+    public AccommodationCreateResponse createAccommodation(@RequestBody AccommodationRequest accommodationRequest) {
 
         Accommodation accommodation = new Accommodation();
         accommodation.setId(accommodationRequest.getId());
@@ -96,28 +66,16 @@ public class AccommodationController {
 
         accommodationMapper.insertAccommodation(accommodation);
 
-        AccommodationResponse accommodationResponse = AccommodationResponse.builder()
-                .id(accommodation.getId())
-                .hostId(accommodation.getHostId())
-                .name(accommodation.getName())
-                .description(accommodation.getDescription())
-                .price(accommodation.getPrice())
-                .address(accommodation.getAddress())
-                .extraRate(accommodation.getExtraRate())
-                .maxCapacity(accommodation.getMaxCapacity())
-                .bedroom(accommodation.getBedroom())
-                .bed(accommodation.getBed())
-                .bathroom(accommodation.getBathroom())
+        return AccommodationCreateResponse.builder()
+                .accommodation(accommodation)
                 .success(true)
                 .build();
-
-        return accommodationResponse;
     }
 
     // 숙소 수정
     @PutMapping("/{accommodationId}")
-    public AccommodationResponse updateAccommodation(@PathVariable int accommodationId,
-                                      @RequestBody AccommodationRequest accommodationRequest) {
+    public AccommodationEditResponse updateAccommodation(@PathVariable int accommodationId,
+                                                         @RequestBody AccommodationRequest accommodationRequest) {
 
 
         Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
@@ -135,22 +93,10 @@ public class AccommodationController {
 
         int updated = accommodationMapper.updateAccommodation(accommodation);
 
-        AccommodationResponse updatedResponse = AccommodationResponse.builder()
-                .id(accommodation.getId())
-                .hostId(accommodation.getHostId())
-                .name(accommodation.getName())
-                .description(accommodation.getDescription())
-                .price(accommodation.getPrice())
-                .address(accommodation.getAddress())
-                .extraRate(accommodation.getExtraRate())
-                .maxCapacity(accommodation.getMaxCapacity())
-                .bedroom(accommodation.getBedroom())
-                .bed(accommodation.getBed())
-                .bathroom(accommodation.getBathroom())
-                .success(updated > 0)
+        return AccommodationEditResponse.builder()
+                .accommodation(accommodation)
+                .success(true)
                 .build();
-
-        return updatedResponse;
     }
 
     //숙소 삭제
@@ -165,12 +111,19 @@ public class AccommodationController {
         return "숙소 이미지 등록";
     }
 
-    // 숙소 태그 등록
+    /*// 숙소 태그 등록
     @PostMapping("/{accommodationId}/tags")
-    public String addAccommodationTags() {
-        return "숙소 태그 등록";
-    }
+    public String addAccommodationTags(@PathVariable int accommodationId,
+                                       @RequestBody List<String> tagsRequest) {
 
+        return TagsResponse.builder()
+                .accommodationId(accommodationId);
+                .tag(tagsRequest)
+                .success(true)
+                .build()
+                .toString();
+    }
+*/
     // 편의시설 등록
     @PostMapping("/{accommodationId}/amenities")
     public String addAccommodationAmenities() {

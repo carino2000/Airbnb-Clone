@@ -1,4 +1,4 @@
-package com.example.airbnb.dto.response;
+package com.example.airbnb.dto.response.accommodation;
 
 import lombok.*;
 
