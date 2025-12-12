@@ -3,30 +3,55 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.airbnb.mappers.AccommodationMapper">
+    <!-- 숙소 생성-->
     <insert id="insertAccommodation" parameterType="Accommodation" useGeneratedKeys="true" keyProperty="id">
         insert into accommodation
         (host_id, name, description, price, address, extra_rate, max_capacity, bedroom, bed, bathroom)
         values
-        (#{hostId}, #{name}, #{description}, #{price}, #{address}, #{extraRate}, #{maxCapacity}, #{bedroom}, #{bed}, #{bathroom});
+        (#{hostId}, #{name}, #{description}, #{price}, #{address}, #{extraRate}, #{maxCapacity}, #{bedroom}, #{bed},
+        #{bathroom});
     </insert>
+    <!--숙소 이미지 등록-->
     <insert id="insertAccommodationImage" parameterType="AccommodationImage" useGeneratedKeys="true" keyProperty="id">
         insert into accommodation_image (accommodation_id, uri)
         values (#{accommodationId}, #{uri});
     </insert>
-    <insert id="insertAccommodationAmenity" parameterType="AccommodationAmenity" useGeneratedKeys="true" keyProperty="id">
+    <!--편의시설 등록-->
+    <insert id="insertAccommodationAmenity" parameterType="Amenities" useGeneratedKeys="true" keyProperty="id">
         insert into amenities (accommodation_id, amenity)
         values (#{accommodationId}, #{amenity});
     </insert>
-    <insert id="insertAccommodationTag" parameterType="AccommodationTag" useGeneratedKeys="true" keyProperty="id">
+    <!--숙소 태그 등록-->
+    <insert id="insertAccommodationTag" parameterType="Tags" useGeneratedKeys="true" keyProperty="id">
         insert into tags (accommodation_id, tag)
         values (#{accommodationId}, #{tag});
     </insert>
 
+    <!--숙소 전체 조회-->
+    <select id="selectAllAccommodations" resultType="Accommodation">
+        select * from accommodation;
+    </select>
+
+    <!-- 숙소 상세 조회-->
     <select id="selectAccommodationById" parameterType="int" resultType="Accommodation">
         select * from accommodation where id=#{id};
     </select>
 
 
+    <!-- 숙소 수정-->
+    <update id="updateAccommodation" parameterType="Accommodation">
+        update accommodation
+        set name=#{name},
+        description=#{description},
+        price=#{price},
+        address=#{address},
+        extra_rate=#{extraRate},
+        max_capacity=#{maxCapacity},
+        bedroom=#{bedroom},
+        bed=#{bed},
+        bathroom=#{bathroom}
+        where id=#{id};
+    </update>
 
 
 </mapper>

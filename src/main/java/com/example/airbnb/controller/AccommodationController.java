@@ -1,11 +1,9 @@
 package com.example.airbnb.controller;
 
 import com.example.airbnb.domain.entity.Accommodation;
-import com.example.airbnb.dto.request.AccommodationImageRequest;
 import com.example.airbnb.dto.request.AccommodationRequest;
 import com.example.airbnb.dto.response.AccommodationResponse;
 import com.example.airbnb.mappers.AccommodationMapper;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,20 +15,20 @@ public class AccommodationController {
     private final AccommodationMapper accommodationMapper;
 
     // 숙소 전체 조회
-    @GetMapping("/accommodations")
+    @GetMapping
     public String getAllAccommodations() {
         return "숙소 전체 조회";
     }
 
 
     // 숙소 상세 조회
-    @GetMapping("/accommodations/{accommodationId}")
+    @GetMapping("/{accommodationId}")
     public String getAccommodationDetails() {
         return "숙소 상세 조회";
     }
 
     // 숙소 생성
-    @PostMapping("/accommodations")
+    @PostMapping
     public AccommodationResponse createAccommodation(@RequestBody AccommodationRequest accommodationRequest) {
 
         Accommodation accommodation = new Accommodation();
@@ -46,7 +44,7 @@ public class AccommodationController {
         accommodation.setBed(accommodationRequest.getBed());
         accommodation.setBathroom(accommodationRequest.getBathroom());
 
-        int inserted = accommodationMapper.insert(accommodation);
+        accommodationMapper.insertAccommodation(accommodation);
 
         AccommodationResponse accommodationResponse = AccommodationResponse.builder()
                 .id(accommodation.getId())
@@ -67,41 +65,85 @@ public class AccommodationController {
     }
 
     // 숙소 수정
-    @PutMapping("/accommodations/{accommodationId}")
-    public String updateAccommodation() {
-        return "숙소 수정";
+    @PutMapping("/{accommodationId}")
+    public AccommodationResponse updateAccommodation(@PathVariable int accommodationId,
+                                      @RequestBody AccommodationRequest accommodationRequest) {
+
+
+        Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
+
+
+        accommodation.setName(accommodationRequest.getName());
+        accommodation.setDescription(accommodationRequest.getDescription());
+        accommodation.setPrice(accommodationRequest.getPrice());
+        accommodation.setAddress(accommodationRequest.getAddress());
+        accommodation.setExtraRate(accommodationRequest.getExtraRate());
+        accommodation.setMaxCapacity(accommodationRequest.getMaxCapacity());
+        accommodation.setBedroom(accommodationRequest.getBedroom());
+        accommodation.setBed(accommodationRequest.getBed());
+        accommodation.setBathroom(accommodationRequest.getBathroom());
+
+        int updated = accommodationMapper.updateAccommodation(accommodation);
+
+        AccommodationResponse updatedResponse = AccommodationResponse.builder()
+                .id(accommodation.getId())
+                .hostId(accommodation.getHostId())
+                .name(accommodation.getName())
+                .description(accommodation.getDescription())
+                .price(accommodation.getPrice())
+                .address(accommodation.getAddress())
+                .extraRate(accommodation.getExtraRate())
+                .maxCapacity(accommodation.getMaxCapacity())
+                .bedroom(accommodation.getBedroom())
+                .bed(accommodation.getBed())
+                .bathroom(accommodation.getBathroom())
+                .success(updated > 0)
+                .build();
+
+        return updatedResponse;
     }
 
     //숙소 삭제
-    @DeleteMapping("/accommodations/{accommodationId}")
+    @DeleteMapping("/{accommodationId}")
     public String deleteAccommodation() {
         return "숙소 삭제";
     }
 
     //숙소 이미지 등록
-    @PostMapping("/accommodations/{accommodationId}/images")
+    @PostMapping("/{accommodationId}/images")
     public String uploadAccommodationImages() {
         return "숙소 이미지 등록";
     }
 
     // 숙소 태그 등록
-    @PostMapping("/accommodations/{accommodationId}/tags")
+    @PostMapping("/{accommodationId}/tags")
     public String addAccommodationTags() {
         return "숙소 태그 등록";
     }
 
     // 편의시설 등록
-    @PostMapping("/accommodations/{accommodationId}/amenities")
+    @PostMapping("/{accommodationId}/amenities")
     public String addAccommodationAmenities() {
         return "편의시설 등록";
     }
 
     // 특정 편의시설에 달린 리뷰 주회
-    @GetMapping("/accommodations/{accommodationId}/reviews")
+    @GetMapping("/{accommodationId}/reviews")
     public String getAccommodationReviews() {
         return "특정 편의시설에 달린 리뷰 조회";
     }
 
+    //좋아요 조회
+    @GetMapping("/likes")
+    public String getAccommodationLikes() {
+        return "좋아요 조회";
+    }
+
+    //좋아요 등록
+    @PostMapping("/{accommodationId}/likes")
+    public String addAccommodationLike() {
+        return "좋아요 등록";
+    }
 
 
 }
