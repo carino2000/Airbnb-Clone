@@ -10,5 +10,4 @@ public class AccountResponse {
     boolean success;
     String message;
     Account data;
-    String token;
 }

@@ -1,15 +1,14 @@
 package com.example.airbnb.dto.response;
 
-import com.example.airbnb.domain.entity.Reservation;
+import com.example.airbnb.domain.entity.Account;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
-public class ReservationResponse {
+public class AccountLoginResponse {
     boolean success;
     String message;
-    Reservation data;
+    Account data;
+    String token;
 }
