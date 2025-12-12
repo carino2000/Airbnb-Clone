@@ -1,6 +1,7 @@
 package com.example.airbnb.dto.response.accommodation;
 
 import com.example.airbnb.domain.entity.Accommodation;
+import com.example.airbnb.domain.entity.Likes;
 import lombok.*;
 
 @Getter
@@ -9,7 +10,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccommodationInsertLikesResponse {
-    Accommodation accommodation;
+
+    Likes likes;
 
     boolean success;
 }

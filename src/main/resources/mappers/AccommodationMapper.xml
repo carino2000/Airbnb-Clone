@@ -21,7 +21,6 @@
         values
         (#{hostId}, #{name}, #{description}, #{price}, #{address}, #{extraRate}, #{maxCapacity}, #{bedroom}, #{bed},
         #{bathroom});
-        #{bathroom});
     </insert>
 
     <!-- 숙소 수정-->
@@ -39,26 +38,49 @@
         where id=#{id};
     </update>
 
+    <!-- 숙소 삭제-->
+    <delete id="deleteAccommodation" parameterType="int">
+        delete from accommodation where id=#{id};
+    </delete>
+
     <!--숙소 이미지 등록-->
     <insert id="insertAccommodationImage" parameterType="AccommodationImage" useGeneratedKeys="true" keyProperty="id">
         insert into accommodation_image (accommodation_id, uri)
         values (#{accommodationId}, #{uri});
     </insert>
-    <!--편의시설 등록-->
-    <insert id="insertAccommodationAmenity" parameterType="Amenities" useGeneratedKeys="true" keyProperty="id">
-        insert into amenities (accommodation_id, amenity)
-        values (#{accommodationId}, #{amenity});
-    </insert>
+
     <!--숙소 태그 등록-->
     <insert id="insertAccommodationTag" parameterType="Tags" useGeneratedKeys="true" keyProperty="id">
         insert into tags (accommodation_id, tag)
         values (#{accommodationId}, #{tag});
     </insert>
 
+    <!--편의시설 등록-->
+    <insert id="insertAccommodationAmenity" parameterType="Amenities" useGeneratedKeys="true" keyProperty="id">
+        insert into amenities (accommodation_id, amenity)
+        values (#{accommodationId}, #{amenity});
+    </insert>
 
+    <!--특정 편의시설에 달린 리뷰 조회-->
+    <select id="selectReviewsByAmenity" parameterType="map" resultType="Review">
+        select *
+        from review r
+        join accommodation_amenity_review aar
+        on r.id = aar.review_id
+        where aar.amenity_id = #{amenityId};
+    </select>
 
+    <!--좋아요 조회-->
+    <select id="selectAccommodationLike" parameterType="map" resultType="Likes">
+        select * from accommodation_like
+        where accommodation_id=#{accommodationId} and user_id=#{userId};
+    </select>
 
-
+    <!--좋아요 등록-->
+    <insert id="insertAccommodationLike" parameterType="Likes" useGeneratedKeys="true" keyProperty="id">
+        insert into accommodation_like (accommodation_id, user_id)
+        values (#{accommodationId}, #{userId});
+    </insert>
 
 
 </mapper>
