@@ -44,21 +44,24 @@ public class ReservationController {
         ReservationResponse resp = new ReservationResponse();
         resp.setSuccess(false);
 
-        System.out.println(nrr.toString());
+        if(reservationMapper.countDuplicateDate(nrr.toParam()) > 0){
+            resp.setMessage("ReservationDate Duplicated");
+            return resp;
+        }
 
         try{
             String code = UUID.randomUUID().toString().split("-")[0].toUpperCase();
             Reservation reservation = nrr.toReservation(code);
             int r = reservationMapper.insertOne(reservation);
             if (r != 1) {
-                throw new RuntimeException("Error in creating reservation");
+                throw new RuntimeException("Error in insert reservation");
             }
 
             List<ReservationDate> list = new ArrayList<>();
             for (LocalDate d = nrr.getStartDate(); d.isBefore(nrr.getEndDate()) || d.equals(nrr.getEndDate()); d = d.plusDays(1)) {
                 r = reservationMapper.insertReservationDate(new ReservationDate(nrr.getAccommodationId(), d));
                 if (r != 1) {
-                    throw new RuntimeException("Error in creating reservation");
+                    throw new RuntimeException("Error in insert reservationDate");
                 }
             }
             resp.setSuccess(true);
