@@ -7,6 +7,9 @@ import com.example.airbnb.mappers.AccommodationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @CrossOrigin
 @RestController
 @RequiredArgsConstructor
@@ -16,8 +19,34 @@ public class AccommodationController {
 
     // 숙소 전체 조회
     @GetMapping
-    public String getAllAccommodations() {
-        return "숙소 전체 조회";
+    public List<AccommodationResponse> selectAllAccommodations(@RequestParam (required = false) String name,
+                                       @RequestParam (required = false) Integer priceMin,
+                                       @RequestParam (required = false) Integer priceMax,
+                                       @RequestParam (required = false) String address) {
+
+        List<Accommodation> accommodations = accommodationMapper.selectAllAccommodations();
+
+
+        List<AccommodationResponse> accommodationResponse = new ArrayList<>();
+        for (Accommodation a : accommodations) {
+            AccommodationResponse resp = AccommodationResponse.builder()
+                    .id(a.getId())
+                    .hostId(a.getHostId())
+                    .name(a.getName())
+                    .description(a.getDescription())
+                    .price(a.getPrice())
+                    .address(a.getAddress())
+                    .extraRate(a.getExtraRate())
+                    .maxCapacity(a.getMaxCapacity())
+                    .bedroom(a.getBedroom())
+                    .bed(a.getBed())
+                    .bathroom(a.getBathroom())
+                    .success(true)
+                    .build();
+            accommodationResponse.add(resp);
+        }
+
+        return accommodationResponse;
     }
 
 
