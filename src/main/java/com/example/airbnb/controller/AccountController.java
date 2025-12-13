@@ -31,6 +31,7 @@ public class AccountController {
     final AccountMapper accountMapper;
     final VerificationMapper verificationMapper;
 
+    // 신규 회원가입
     @PostMapping("/register")
     public AccountResponse createAccount(@RequestBody @Valid NewAccountRequest nar,
                                               BindingResult bindingResult) {
@@ -77,7 +78,7 @@ public class AccountController {
         return resp;
     }
 
-
+    // 로그인
     @PostMapping("/login")
     public AccountLoginResponse login(@RequestBody LoginRequest lr) {
         AccountLoginResponse resp = new AccountLoginResponse();
@@ -104,6 +105,7 @@ public class AccountController {
         return resp;
     }
 
+    // 회원 정보 수정
     @PutMapping("/{accountId}")
     public AccountResponse editProfile(@RequestBody @Valid EditProfileRequest epr, BindingResult bindingResult,
                                             @PathVariable String accountId,
@@ -136,6 +138,7 @@ public class AccountController {
         return resp;
     }
 
+    // 회원 탈퇴
     @DeleteMapping("/{accountId}")
     public AccountResponse deleteAccount(@PathVariable String accountId,
                                               @RequestAttribute String tokenId) {
@@ -162,7 +165,7 @@ public class AccountController {
         return resp;
     }
 
-
+    // 계정 비밀번호 변경
     @PutMapping("/{accountId}/password")
     public AccountResponse editPassword(@PathVariable String accountId,
                                              @RequestAttribute String tokenId,

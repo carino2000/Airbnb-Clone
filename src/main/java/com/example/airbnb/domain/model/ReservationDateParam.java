@@ -11,6 +11,4 @@ public class ReservationDateParam {
     int accommodationId;
     LocalDate startDate;
     LocalDate endDate;
-
-
 }

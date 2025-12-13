@@ -16,8 +16,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,6 +25,7 @@ import java.util.UUID;
 public class ReservationController {
     final ReservationMapper reservationMapper;
 
+    // 예약 정보 1건 조회
     @GetMapping("/{code}")
     public ReservationResponse getReservations(@PathVariable String code) {
         ReservationResponse resp = new ReservationResponse();
@@ -44,18 +43,19 @@ public class ReservationController {
         return resp;
     }
 
+    // 예약 정보 등록
     @PostMapping
     @Transactional
     public ReservationResponse createReservation(@RequestBody NewReservationRequest nrr) {
         ReservationResponse resp = new ReservationResponse();
         resp.setSuccess(false);
 
-        if(reservationMapper.countDuplicateDate(nrr.toParam()) > 0){
+        if (reservationMapper.countDuplicateDate(nrr.toParam()) > 0) {
             resp.setMessage("ReservationDate Duplicated");
             return resp;
         }
 
-        try{
+        try {
             String code = UUID.randomUUID().toString().split("-")[0].toUpperCase();
             Reservation reservation = nrr.toReservation(code);
             int r = reservationMapper.insertOne(reservation);
@@ -72,7 +72,7 @@ public class ReservationController {
             resp.setSuccess(true);
             resp.setMessage("Reservation created");
             resp.setData(reservation);
-        }catch (Exception e){
+        } catch (Exception e) {
             resp.setMessage(e.getMessage());
             throw e;
         }
@@ -80,11 +80,12 @@ public class ReservationController {
         return resp;
     }
 
+    // 예약 정보 수정
     @PutMapping("/{code}")
     @Transactional
     public ReservationResponse updateReservation(@PathVariable String code,
                                                  @RequestBody @Valid EditReservationRequest err,
-                                                                        BindingResult bindingResult) {
+                                                 BindingResult bindingResult) {
         ReservationResponse resp = new ReservationResponse();
         resp.setSuccess(false);
 
@@ -100,46 +101,61 @@ public class ReservationController {
 
 
         Reservation reservation = reservationMapper.selectOne(code);
-        if(reservation == null){
+        if (reservation == null) {
             resp.setMessage("Reservation not found");
             return resp;
         }
 
 
-
-        try{
+        try {
             reservationMapper.deleteReservationDate(reservation.toParam());
 
-            if(reservationMapper.countDuplicateDate(err.toParam(reservation.getAccommodationId())) > 0){
+            if (reservationMapper.countDuplicateDate(err.toDateParam(reservation.getAccommodationId())) > 0) {
                 resp.setMessage("ReservationDate Duplicated");
                 return resp;
             }
 
-            ReservationUpdateParam param = new ReservationUpdateParam();
-
-            param.setCode(code);
-            param.setVisitors(err.getVisitors());
-            param.setStartDate(err.getStartDate());
-            param.setEndDate(err.getEndDate());
-            param.setPrice(err.getPrice());
-
-            int r = reservationMapper.updateReservation(param);
-            if (r != 1) {
+            if (reservationMapper.updateReservation(err.toUpdateParam(code)) != 1) {
                 throw new RuntimeException("Error in insert reservation");
             }
 
             for (LocalDate d = err.getStartDate(); d.isBefore(err.getEndDate()) || d.equals(err.getEndDate()); d = d.plusDays(1)) {
-                r = reservationMapper.insertReservationDate(new ReservationDate(reservation.getAccommodationId(), d));
-                if (r != 1) {
+                if (reservationMapper.insertReservationDate(new ReservationDate(reservation.getAccommodationId(), d)) != 1) {
                     throw new RuntimeException("Error in insert reservationDate");
                 }
             }
             resp.setSuccess(true);
             resp.setMessage("Reservation Update");
-        }catch (Exception e){
+        } catch (Exception e) {
             resp.setMessage(e.getMessage());
             throw e;
         }
+        return resp;
+    }
+
+    // 예약 정보 삭제
+    @DeleteMapping("/{code}")
+    public ReservationResponse deleteReservation(@PathVariable String code) {
+        ReservationResponse resp = new ReservationResponse();
+        resp.setSuccess(false);
+
+        Reservation target = reservationMapper.selectOne(code);
+        if (target == null) {
+            resp.setMessage("Reservation not found");
+            return resp;
+        }
+
+        ReservationDateParam param = new ReservationDateParam();
+        param.setAccommodationId(target.getAccommodationId());
+        param.setStartDate(target.getStartDate());
+        param.setEndDate(target.getEndDate());
+
+        reservationMapper.deleteReservationByCode(code);
+        reservationMapper.deleteReservationDate(param);
+
+        resp.setSuccess(true);
+        resp.setMessage("Reservation Delete Complete");
+
         return resp;
     }
 }
