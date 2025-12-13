@@ -1,5 +1,6 @@
 package com.example.airbnb.dto.response.accommodation;
 
+import com.example.airbnb.domain.entity.AccommodationImage;
 import lombok.*;
 
 @Getter
@@ -8,9 +9,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccommodationImageResponse {
-    int id;
-    int accommodationId;
-    String uri;
+
+    AccommodationImage image;
+
+    boolean success;
 
 
 }

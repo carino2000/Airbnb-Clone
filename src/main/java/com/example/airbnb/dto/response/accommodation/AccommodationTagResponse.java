@@ -1,7 +1,9 @@
 package com.example.airbnb.dto.response.accommodation;
 
-import com.example.airbnb.domain.entity.Accommodation;
+import com.example.airbnb.domain.entity.Tags;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -9,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccommodationTagResponse {
-    Accommodation accommodation;
+    List<Tags> tags;
 
     boolean success;
 }
