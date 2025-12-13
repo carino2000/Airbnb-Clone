@@ -46,9 +46,25 @@ public class ReservationController {
     // 예약 정보 등록
     @PostMapping
     @Transactional
-    public ReservationResponse createReservation(@RequestBody NewReservationRequest nrr) {
+    public ReservationResponse createReservation(@RequestBody @Valid NewReservationRequest nrr, BindingResult bindingResult,
+                                                 @RequestAttribute String tokenId) {
         ReservationResponse resp = new ReservationResponse();
         resp.setSuccess(false);
+
+        if (!tokenId.equals(nrr.getAccountId())) {
+            resp.setMessage("invalid token");
+            return resp;
+        }
+
+        if (bindingResult.hasErrors()) {
+            FieldError fe = bindingResult.getFieldError();
+            if (fe != null) {
+                resp.setMessage(fe.getField() + " 필드 오류: " + fe.getDefaultMessage());
+            } else {
+                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+            }
+            return resp;
+        }
 
         if (reservationMapper.countDuplicateDate(nrr.toParam()) > 0) {
             resp.setMessage("ReservationDate Duplicated");
@@ -84,10 +100,11 @@ public class ReservationController {
     @PutMapping("/{code}")
     @Transactional
     public ReservationResponse updateReservation(@PathVariable String code,
-                                                 @RequestBody @Valid EditReservationRequest err,
-                                                 BindingResult bindingResult) {
+                                                 @RequestBody @Valid EditReservationRequest err, BindingResult bindingResult,
+                                                 @RequestAttribute String tokenId) {
         ReservationResponse resp = new ReservationResponse();
         resp.setSuccess(false);
+
 
         if (bindingResult.hasErrors()) {
             FieldError fe = bindingResult.getFieldError();
@@ -103,6 +120,11 @@ public class ReservationController {
         Reservation reservation = reservationMapper.selectOne(code);
         if (reservation == null) {
             resp.setMessage("Reservation not found");
+            return resp;
+        }
+
+        if (!tokenId.equals(reservation.getAccountId())) {
+            resp.setMessage("invalid token");
             return resp;
         }
 
@@ -135,13 +157,19 @@ public class ReservationController {
 
     // 예약 정보 삭제
     @DeleteMapping("/{code}")
-    public ReservationResponse deleteReservation(@PathVariable String code) {
+    public ReservationResponse deleteReservation(@PathVariable String code,
+                                                 @RequestAttribute String tokenId) {
         ReservationResponse resp = new ReservationResponse();
         resp.setSuccess(false);
 
         Reservation target = reservationMapper.selectOne(code);
         if (target == null) {
             resp.setMessage("Reservation not found");
+            return resp;
+        }
+
+        if (!tokenId.equals(target.getAccountId())) {
+            resp.setMessage("invalid token");
             return resp;
         }
 

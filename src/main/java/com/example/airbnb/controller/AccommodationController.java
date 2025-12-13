@@ -38,7 +38,6 @@ public class AccommodationController {
         return AccommodationSelectAllResponse.builder().success(true).accommodations(accommodations).build();
     }
 
-
     // 숙소 상세 조회
     @GetMapping("/{accommodationId}")
     public AccommodationSelectByIdResponse selectAccommodationById(@PathVariable int accommodationId) {
