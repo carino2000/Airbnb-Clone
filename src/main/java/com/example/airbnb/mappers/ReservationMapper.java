@@ -13,6 +13,8 @@ public interface ReservationMapper {
     int insertReservationDate(ReservationDate reservationDate);
     Reservation selectOne(String code);
     int countDuplicateDate(ReservationDateParam params);
+
+    int deleteReservationByCode(String code);
     int deleteReservationDate(ReservationDateParam params);
     int updateReservation(ReservationUpdateParam params);
 }

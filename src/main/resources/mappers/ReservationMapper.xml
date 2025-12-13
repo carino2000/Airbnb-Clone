@@ -21,6 +21,9 @@
     </select>
 
 
+    <delete id="deleteReservationByCode" parameterType="string">
+        delete from reservation where code=#{code}
+    </delete>
 
     <delete id="deleteReservationDate" parameterType="ReservationDateParam">
         delete from reservation_date where accommodation_id=#{accommodationId} and date between #{startDate} and #{endDate}

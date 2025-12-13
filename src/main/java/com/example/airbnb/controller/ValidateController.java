@@ -22,6 +22,7 @@ public class ValidateController {
     final VerificationMapper verificationMapper;
     final JavaMailSender mailSender;
 
+    // 아이디 중복체크
     @GetMapping("/id")
     public DuplicateResponse checkDuplicateId(@RequestParam(required = false) String id) {
         DuplicateResponse resp = new DuplicateResponse();
@@ -35,6 +36,7 @@ public class ValidateController {
         return resp;
     }
 
+    // 이메일 중복체크
     @GetMapping("/email")
     public DuplicateResponse checkDuplicateEmail(@RequestParam(required = false) String email) {
         DuplicateResponse resp = new DuplicateResponse();
@@ -48,6 +50,7 @@ public class ValidateController {
         return resp;
     }
 
+    // 이메일 인증코드 발송
     @PostMapping("/code")
     public EmailCodeResponse sendEmailCode(@RequestBody NewEmailCodeRequest necr) {
         String email = necr.getEmail();
