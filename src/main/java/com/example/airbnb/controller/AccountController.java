@@ -43,7 +43,7 @@ public class AccountController {
             if (fe != null) {
                 resp.setMessage(fe.getField() + " 필드 오류: " + fe.getDefaultMessage());
             } else {
-                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().getFirst().getDefaultMessage());
             }
             return resp;
         }
@@ -122,7 +122,7 @@ public class AccountController {
             if (fe != null) {
                 resp.setMessage(fe.getField() + " 필드 오류: " + fe.getDefaultMessage());
             } else {
-                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().getFirst().getDefaultMessage());
             }
             return resp;
         }
@@ -183,7 +183,7 @@ public class AccountController {
             if (fe != null) {
                 resp.setMessage(fe.getField() + " 필드 오류: " + fe.getDefaultMessage());
             } else {
-                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().getFirst().getDefaultMessage());
             }
             return resp;
         }
