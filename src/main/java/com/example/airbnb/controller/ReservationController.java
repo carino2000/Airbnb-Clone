@@ -5,8 +5,12 @@ import com.example.airbnb.domain.entity.ReservationDate;
 import com.example.airbnb.domain.model.ReservationDateParam;
 import com.example.airbnb.domain.model.ReservationUpdateParam;
 import com.example.airbnb.dto.request.EditReservationRequest;
+import com.example.airbnb.dto.request.NewMessageRequest;
 import com.example.airbnb.dto.request.NewReservationRequest;
+import com.example.airbnb.dto.response.DeleteMessageResponse;
 import com.example.airbnb.dto.response.ReservationResponse;
+import com.example.airbnb.dto.response.SendMessageResponse;
+import com.example.airbnb.mappers.MessageMapper;
 import com.example.airbnb.mappers.ReservationMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +28,11 @@ import java.util.UUID;
 @CrossOrigin
 public class ReservationController {
     final ReservationMapper reservationMapper;
+    final MessageMapper messageMapper;
 
     // 예약 정보 1건 조회
     @GetMapping("/{code}")
-    public ReservationResponse getReservations(@PathVariable String code) {
+    public ReservationResponse getReservation(@PathVariable String code) {
         ReservationResponse resp = new ReservationResponse();
         resp.setSuccess(false);
 
@@ -61,7 +66,7 @@ public class ReservationController {
             if (fe != null) {
                 resp.setMessage(fe.getField() + " 필드 오류: " + fe.getDefaultMessage());
             } else {
-                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().getFirst().getDefaultMessage());
             }
             return resp;
         }
@@ -111,25 +116,23 @@ public class ReservationController {
             if (fe != null) {
                 resp.setMessage(fe.getField() + " 필드 오류: " + fe.getDefaultMessage());
             } else {
-                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().get(0).getDefaultMessage());
+                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().getFirst().getDefaultMessage());
             }
             return resp;
         }
 
-
-        Reservation reservation = reservationMapper.selectOne(code);
-        if (reservation == null) {
-            resp.setMessage("Reservation not found");
-            return resp;
-        }
-
-        if (!tokenId.equals(reservation.getAccountId())) {
-            resp.setMessage("invalid token");
-            return resp;
-        }
-
-
         try {
+            Reservation reservation = reservationMapper.selectOne(code);
+            if (reservation == null) {
+                resp.setMessage("Reservation not found");
+                return resp;
+            }
+
+            if (!tokenId.equals(reservation.getAccountId())) {
+                resp.setMessage("invalid token");
+                return resp;
+            }
+
             reservationMapper.deleteReservationDate(reservation.toParam());
 
             if (reservationMapper.countDuplicateDate(err.toDateParam(reservation.getAccommodationId())) > 0) {
@@ -157,33 +160,74 @@ public class ReservationController {
 
     // 예약 정보 삭제
     @DeleteMapping("/{code}")
+    @Transactional
     public ReservationResponse deleteReservation(@PathVariable String code,
                                                  @RequestAttribute String tokenId) {
         ReservationResponse resp = new ReservationResponse();
         resp.setSuccess(false);
 
-        Reservation target = reservationMapper.selectOne(code);
-        if (target == null) {
-            resp.setMessage("Reservation not found");
+        try {
+            Reservation target = reservationMapper.selectOne(code);
+            if (target == null) {
+                resp.setMessage("Reservation not found");
+                return resp;
+            }
+
+            if (!tokenId.equals(target.getAccountId())) {
+                resp.setMessage("invalid token");
+                return resp;
+            }
+
+            ReservationDateParam param = new ReservationDateParam();
+            param.setAccommodationId(target.getAccommodationId());
+            param.setStartDate(target.getStartDate());
+            param.setEndDate(target.getEndDate());
+
+            reservationMapper.deleteReservationByCode(code);
+            reservationMapper.deleteReservationDate(param);
+
+            resp.setSuccess(true);
+            resp.setMessage("Reservation Delete Complete");
+        } catch (Exception e) {
+            resp.setMessage(e.getMessage());
+            throw e;
+        }
+
+        return resp;
+    }
+
+    // 메시지 전송
+    @PostMapping("/messages")
+    public SendMessageResponse sendMessage(@RequestBody @Valid NewMessageRequest nmr, BindingResult bindingResult,
+                                           @RequestAttribute String tokenId) {
+        SendMessageResponse resp = new SendMessageResponse();
+        resp.setSuccess(false);
+
+        if (bindingResult.hasErrors()) {
+            FieldError fe = bindingResult.getFieldError();
+            if (fe != null) {
+                resp.setMessage(fe.getField() + " 필드 오류: " + fe.getDefaultMessage());
+            } else {
+                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().getFirst().getDefaultMessage());
+            }
             return resp;
         }
 
-        if (!tokenId.equals(target.getAccountId())) {
+        if (!tokenId.equals(nmr.getWriterId())) {
             resp.setMessage("invalid token");
             return resp;
         }
 
-        ReservationDateParam param = new ReservationDateParam();
-        param.setAccommodationId(target.getAccommodationId());
-        param.setStartDate(target.getStartDate());
-        param.setEndDate(target.getEndDate());
-
-        reservationMapper.deleteReservationByCode(code);
-        reservationMapper.deleteReservationDate(param);
-
-        resp.setSuccess(true);
-        resp.setMessage("Reservation Delete Complete");
+        int r = messageMapper.insertOne(nmr.toMessage());
+        if (r != 1) {
+            resp.setMessage("Error in insert message");
+        } else {
+            resp.setSuccess(true);
+            resp.setMessage("Message Insert Complete");
+            resp.setMessageData(nmr.toMessage());
+        }
 
         return resp;
     }
+
 }

@@ -4,5 +4,9 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.airbnb.mappers.MessageMapper">
 
+    <insert id="insertOne" parameterType="Message">
+        insert into message (reservation_code, writer_id, recipient_id, content)
+        values(#{reservationCode}, #{writerId}, #{recipientId}, #{content})
+    </insert>
 
 </mapper>
