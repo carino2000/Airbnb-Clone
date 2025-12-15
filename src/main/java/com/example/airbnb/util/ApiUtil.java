@@ -35,33 +35,18 @@ public class ApiUtil {
                 throw new IllegalStateException("holiday check failed");
             }
 
-            JsonNode root = objectMapper.readTree(json);
-            JsonNode itemNode = root
+            JsonNode itemNode = objectMapper.readTree(json)
                     .path("response")
                     .path("body")
-                    .path("items")
-                    .path("item");
+                    .path("items");
 
             if (itemNode.isMissingNode() || itemNode.isNull() || itemNode.isEmpty()) {
                 return false;
             }
 
-            Holidays holidays = new Holidays();
-            if (!itemNode.isArray()) {
-                HolidayItem item =
-                        objectMapper.convertValue(itemNode, HolidayItem.class);
-                holidays.setItem(new HolidayItem[]{item});
-            } else {
-                HolidayItem[] items =
-                        objectMapper.convertValue(
-                                itemNode,
-                                HolidayItem[].class
-                        );
-                holidays.setItem(items);
-            }
-
-            for(HolidayItem item : holidays.getItem()){
-                if(item.toLocalDate().equals(targetDate) && item.getIsHoliday().equals("Y")){
+            Holidays holidays = objectMapper.convertValue(itemNode, Holidays.class);
+            for (HolidayItem item : holidays.getItem()) {
+                if (item.toLocalDate().equals(targetDate) && item.getIsHoliday().equals("Y")) {
                     return true;
                 }
             }
