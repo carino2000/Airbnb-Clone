@@ -1,41 +1,115 @@
 package com.example.airbnb.controller;
 
-import com.example.airbnb.domain.entity.Accommodation;
-import com.example.airbnb.domain.entity.Tags;
-import com.example.airbnb.domain.entity.Likes;
-import com.example.airbnb.domain.entity.Amenities;
-import com.example.airbnb.domain.entity.AccommodationImage;
+import com.example.airbnb.domain.entity.*;
+import com.example.airbnb.dto.request.AccommodationImageRequest;
 import com.example.airbnb.dto.request.AccommodationRequest;
+import com.example.airbnb.dto.request.LikesRequest;
 import com.example.airbnb.dto.response.accommodation.*;
 import com.example.airbnb.mappers.AccommodationMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 @CrossOrigin
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/accommodations")
 public class AccommodationController {
-    private final AccommodationMapper accommodationMapper;
+    final AccommodationMapper accommodationMapper;
 
-    // 숙소 전체 조회(검색)
+    // 검색 필터링 or 필터링 없는 숙소 전체 조회
     @GetMapping
-    public AccommodationSelectAllResponse selectAllAccommodations(@RequestParam (required = false) String Destination,
-                                                                  @RequestParam (required = false) LocalDate CheckInDate,
-                                                                  @RequestParam (required = false) LocalDate CheckOutDate,
-                                                                  @RequestParam (required = false) Integer Guests) {
+    public AccommodationSelectAllResponse selectAllAccommodations(
+            @RequestParam(required = false) String destination,
+            @RequestParam(required = false) LocalDate checkInDate,
+            @RequestParam(required = false) LocalDate checkOutDate,
+            @RequestParam(required = false) Integer guests
+    ) {
 
-        List<Accommodation> accommodations = accommodationMapper.selectAllAccommodations();
+        List<Integer> accommodations = new ArrayList<>();
 
-        return AccommodationSelectAllResponse.builder().success(true).accommodations(accommodations).build();
+        if (destination != null && !destination.isBlank()) {
+            List<Integer> idsByDestination
+                    = accommodationMapper.selectAccommodationsByDestination(destination);
+            accommodations.addAll(idsByDestination);
+
+        } else {
+            List<Accommodation> all = accommodationMapper.selectAllAccommodations();
+            for (Accommodation accommodation : all) {
+                accommodations.add(accommodation.getId());
+            }
+        }
+
+        if (guests != null && guests > 0) {
+            List<Integer> fits = new ArrayList<>();
+            List<Accommodation> all = accommodationMapper.selectAllAccommodations();
+            for (Accommodation accommodation : all) {
+                if (accommodation.getMaxCapacity() >= guests) {
+                    fits.add(accommodation.getId());
+                }
+            }
+            accommodations.retainAll(fits);
+        }
+
+        if (checkInDate != null && checkOutDate != null) {
+            List<Integer> reserved
+                    = accommodationMapper.selectUnavailableAccommodationsByDate(checkInDate, checkOutDate);
+            if (reserved != null && !reserved.isEmpty()) {
+                accommodations.removeAll(reserved);
+            }
+        }
+
+        List<Accommodation> accommodationList;
+
+        if (accommodations.isEmpty()) {
+            accommodationList = new ArrayList<>();
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < accommodations.size(); i++) {
+                if (i > 0) {
+                    sb.append(",");
+                }
+                sb.append(accommodations.get(i));
+            }
+            String ids = sb.toString();
+            accommodationList = accommodationMapper.selectAccommodationsByIds(ids);
+
+        }
+
+        List<AccommodationImage> images = new ArrayList<>();
+        List<Tags> tagList = new ArrayList<>();
+        List<Amenities> amenityList = new ArrayList<>();
+        List<Likes> likesList = new ArrayList<>();
+
+        if (accommodationList != null && !accommodationList.isEmpty()) {
+            for (Accommodation accommodation : accommodationList) {
+
+                int accommodationId = accommodation.getId();
+
+                accommodationMapper.selectAccommodationImagesByAccommodationId(accommodationId);
+                accommodationMapper.selectAccommodationTagsByAccommodationId(accommodationId);
+                accommodationMapper.selectAccommodationAmenitiesByAccommodationId(accommodationId);
+                accommodationMapper.selectLikeCountByAccommodation(accommodationId);
+
+            }
+        }
+
+        return AccommodationSelectAllResponse.builder()
+                .accommodations(accommodationList)
+                .accommodationImages(images)
+                .tags(tagList)
+                .amenities(amenityList)
+                .likes(likesList)
+                .success(true)
+                .build();
     }
 
     // 숙소 상세 조회
@@ -43,22 +117,35 @@ public class AccommodationController {
     public AccommodationSelectByIdResponse selectAccommodationById(@PathVariable int accommodationId) {
 
         Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
-        if (accommodation == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "조회된 숙소가 없습니다");
+
+        List<AccommodationImage> images = new ArrayList<>();
+        List<Tags> tagList = new ArrayList<>();
+        List<Amenities> amenityList = new ArrayList<>();
+        List<Likes> likesList = new ArrayList<>();
+
+        if (accommodation != null) {
+
+            accommodationMapper.selectAccommodationImagesByAccommodationId(accommodationId);
+            accommodationMapper.selectAccommodationTagsByAccommodationId(accommodationId);
+            accommodationMapper.selectAccommodationAmenitiesByAccommodationId(accommodationId);
+            accommodationMapper.selectLikeCountByAccommodation(accommodationId);
+
         }
+
 
         return AccommodationSelectByIdResponse.builder()
                 .accommodation(accommodation)
+                .accommodationImages(images)
+                .tags(tagList)
+                .amenities(amenityList)
+                .likes(likesList)
                 .success(true)
                 .build();
-
-
     }
 
     // 숙소 생성
     @PostMapping
     public AccommodationCreateResponse createAccommodation(@RequestBody AccommodationRequest accommodationRequest) {
-
         Accommodation accommodation = new Accommodation();
         accommodation.setId(accommodationRequest.getId());
         accommodation.setHostId(accommodationRequest.getHostId());
@@ -72,7 +159,6 @@ public class AccommodationController {
         accommodation.setBed(accommodationRequest.getBed());
         accommodation.setBathroom(accommodationRequest.getBathroom());
 
-        // NOTE: hostId must exist in account table due to FK constraint
         accommodationMapper.insertAccommodation(accommodation);
 
         return AccommodationCreateResponse.builder()
@@ -87,9 +173,6 @@ public class AccommodationController {
                                                          @RequestBody AccommodationRequest accommodationRequest) {
 
         Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
-        if (accommodation == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "수정할 숙소가 없습니다");
-        }
 
         accommodation.setName(accommodationRequest.getName());
         accommodation.setDescription(accommodationRequest.getDescription());
@@ -109,39 +192,57 @@ public class AccommodationController {
                 .build();
     }
 
-    //숙소 삭제
+    // 숙소 삭제
     @DeleteMapping("/{accommodationId}")
     public AccommodationDeleteResponse deleteAccommodation(@PathVariable int accommodationId) {
-        Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
 
-        accommodationMapper.deleteAccommodation(accommodationId);
+        int deleted = accommodationMapper.deleteAccommodation(accommodationId);
 
         return AccommodationDeleteResponse.builder()
-                .accommodation(accommodation)
+                .accommodation(deleted)
                 .success(true)
                 .build();
     }
 
-    //숙소 이미지 등록 (URI 리스트 형태로 받음)
-    @PostMapping("/{accommodationId}/images")
+    // 숙소 이미지 등록
+    @PostMapping(value = "/{accommodationId}/images")
     public AccommodationImageResponse uploadAccommodationImages(@PathVariable int accommodationId,
-                                                                 @RequestBody List<String> imageUris) {
+                                                                @ModelAttribute AccommodationImageRequest accommodationImageRequest
+    ) throws IOException {
+
         Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
         if (accommodation == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 숙소가 없습니다");
+            return AccommodationImageResponse.builder().image(new ArrayList<>()).success(false).build();
         }
 
-        AccommodationImage firstSaved = null;
-        for (String uri : imageUris) {
-            AccommodationImage image = new AccommodationImage();
-            image.setAccommodationId(accommodationId);
-            image.setUri(uri);
-            accommodationMapper.insertAccommodationImage(image);
-            if (firstSaved == null) firstSaved = image;
-        }
 
+        List<AccommodationImage> savedImages = new ArrayList<>();
+
+        List<MultipartFile> uri = accommodationImageRequest.getUri();
+
+        if (uri != null && !uri.isEmpty()) {
+
+            Path uplodadPath = Path.of(System.getProperty("user.home"), "accommodations", "images");
+            Files.createDirectories(uplodadPath);
+
+            for (MultipartFile file : uri) {
+                String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+
+                Path filePath = uplodadPath.resolve(uuid);
+                file.transferTo(filePath.toFile());
+
+                String imageUri = "/accommodation/images/" + uuid;
+
+                AccommodationImage accommodationImage = new AccommodationImage();
+                accommodationImage.setAccommodationId(accommodationId);
+                accommodationImage.setUri(imageUri);
+
+                accommodationMapper.insertAccommodationImage(accommodationImage);
+                savedImages.add(accommodationImage);
+            }
+        }
         return AccommodationImageResponse.builder()
-                .image(firstSaved)
+                .image(savedImages)
                 .success(true)
                 .build();
     }
@@ -150,18 +251,19 @@ public class AccommodationController {
     @PostMapping("/{accommodationId}/tags")
     public AccommodationTagResponse addAccommodationTags(@PathVariable int accommodationId,
                                                          @RequestBody List<String> tagsRequest) {
-
-        Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
-        if (accommodation == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 숙소가 없습니다");
-
         List<Tags> savedTags = new ArrayList<>();
         for (String tagText : tagsRequest) {
+
             Tags tags = new Tags();
             tags.setAccommodationId(accommodationId);
             tags.setTag(tagText);
+
             accommodationMapper.insertAccommodationTag(tags);
+
             savedTags.add(tags);
+
         }
+
 
         return AccommodationTagResponse.builder()
                 .tags(savedTags)
@@ -173,17 +275,18 @@ public class AccommodationController {
     @PostMapping("/{accommodationId}/amenities")
     public AccommodationAmenitiesResponse addAccommodationAmenities(@PathVariable int accommodationId,
                                                                     @RequestBody List<String> amenitiesRequest) {
-
-        Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
-        if (accommodation == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 숙소가 없습니다");
-
         List<Amenities> savedAmenities = new ArrayList<>();
-        for (String amenityText : amenitiesRequest) {
+
+        for (String amenity : amenitiesRequest) {
+
             Amenities amenities = new Amenities();
             amenities.setAccommodationId(accommodationId);
-            amenities.setAmenity(amenityText);
+            amenities.setAmenity(amenity);
+
             accommodationMapper.insertAccommodationAmenity(amenities);
+
             savedAmenities.add(amenities);
+
         }
 
         return AccommodationAmenitiesResponse.builder()
@@ -192,49 +295,64 @@ public class AccommodationController {
                 .build();
     }
 
-    // 특정 편의시설에 달린 리뷰 조회 (amenityId를 쿼리로 전달)
+   /* // 특정 숙소에 달린 리뷰 조회
+
     @GetMapping("/{accommodationId}/reviews")
     public AccommodationReviewByAmenitiesResponse getAccommodationReviews(@PathVariable int accommodationId,
-                                                                         @RequestParam int amenityId) {
-        // 간단히 amenityId로 리뷰 조회
-        List<com.example.airbnb.domain.entity.Review> reviews = accommodationMapper.selectReviewsByAmenity(amenityId);
+                                                                          @RequestParam int amenityId) {
+
+        List<Review> reviews = accommodationMapper.selectReviewsByAmenity(accommodationId, amenityId);
+
+
         return AccommodationReviewByAmenitiesResponse.builder()
                 .review(reviews)
                 .success(true)
                 .build();
-    }
-
-    //좋아요 조회
-    @GetMapping("/likes")
-    public AccommodationSelectLikesResponse getAccommodationLikes(@RequestParam int accommodationId,
-                                                                  @RequestParam int userId) {
-        List<Likes> likes = accommodationMapper.selectAccommodationLike(accommodationId, userId);
-        return AccommodationSelectLikesResponse.builder()
-                .likes(likes)
-                .success(true)
-                .build();
-    }
+    }*/
 
     //좋아요 등록
     @PostMapping("/{accommodationId}/likes")
-    public AccommodationInsertLikesResponse addAccommodationLike(@PathVariable int accommodationId,
-                                                                 @RequestBody Map<String, String> body) {
-        String accountId = body.get("accountId");
-        if (accountId == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "accountId required");
+    public AccommodationSelectLikesResponse addAccommodationLike(@PathVariable int accommodationId,
+                                                                 @RequestBody LikesRequest likesRequest) {
 
-        Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
-        if (accommodation == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 숙소가 없습니다");
+        String accountId = likesRequest.getAccountId();
 
         Likes likes = new Likes();
         likes.setAccommodationId(accommodationId);
         likes.setAccountId(accountId);
+
         accommodationMapper.insertAccommodationLike(likes);
 
-        return AccommodationInsertLikesResponse.builder()
-                .likes(likes)
+        return AccommodationSelectLikesResponse.builder()
                 .success(true)
                 .build();
     }
 
+    // 숙소별 좋아요 수
+    @GetMapping("/{accommodationId}/likes")
+    public AccommodationSelectLikesResponse getAccommodationLikes(@PathVariable int accommodationId) {
 
+
+        int likesCount = accommodationMapper.selectLikeCountByAccommodation(accommodationId);
+
+
+        return AccommodationSelectLikesResponse.builder()
+                .likesCount(likesCount)
+                .success(true)
+                .build();
+    }
+
+    // 좋아요 많은 순으로 숙소 목록 반환
+    @GetMapping("/likes/most")
+    public AccommodationMostLikesResponse getAccommodationsOrderByLikeCount() {
+
+        List<Accommodation> rows = accommodationMapper.selectAccommodationsOrderByLikeCount();
+
+        return AccommodationMostLikesResponse.builder()
+
+                .success(true)
+                .mostLikedAccommodations(rows)
+                .build();
+    }
 }
+

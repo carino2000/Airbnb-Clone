@@ -1,6 +1,6 @@
 package com.example.airbnb.dto.response.accommodation;
 
-import com.example.airbnb.domain.entity.Accommodation;
+import com.example.airbnb.domain.entity.*;
 import lombok.*;
 
 import java.util.List;
@@ -11,7 +11,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccommodationSelectAllResponse {
+
     List<Accommodation> accommodations;
+
+    List <AccommodationImage> accommodationImages;
+    List<Tags> tags;
+    List<Amenities> amenities;
+    List<Likes> likes;
 
     boolean success;
 }

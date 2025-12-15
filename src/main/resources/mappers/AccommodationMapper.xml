@@ -4,14 +4,42 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.airbnb.mappers.AccommodationMapper">
 
-    <!--숙소 전체 조회-->
+    <!--검색 필터링 or 필터링 없는 숙소 전체 조회-->
     <select id="selectAllAccommodations" resultType="Accommodation">
-        select * from accommodation;
+        select * from accommodation
     </select>
 
-    <!-- 숙소 상세 조회-->
+    <!-- destination 기준 숙소 조회 -->
+    <select id="selectAccommodationsByDestination" parameterType="string" resultType="int">
+        select accommodation.id
+        from accommodation
+        where accommodation.address like concat('%', #{destination}, '%');
+    </select>
+
+    <!-- 예약의 날짜 범위만 반환 -->
+    <select id="selectUnavailableAccommodationsByDate" resultType="ReservationDate">
+        select distinct
+        accommodation_id as accommodationId,
+        start_date as checkInDate,
+        end_date as checkOutDate
+        from reservation
+    </select>
+
+    <!-- 모든 예약의 날짜 범위 조회-->
+    <select id="selectAllReservationRanges" resultType="ReservationDate">
+        select accommodation_id as accommodationId, start_date as checkInDate, end_date as checkOutDate
+        from reservation
+    </select>
+
+
+    <!-- 숙소 상세 조회(숙소 Id - 단건)-->
     <select id="selectAccommodationById" parameterType="int" resultType="Accommodation">
         select * from accommodation where id=#{id};
+    </select>
+
+    <!-- 숙소 상세 조회(숙소 Id - 다건) -->
+    <select id="selectAccommodationsByIds" parameterType="String" resultType="Accommodation">
+        select * from accommodation where id in (${ids});
     </select>
 
     <!-- 숙소 생성-->
@@ -49,11 +77,21 @@
         values (#{accommodationId}, #{uri});
     </insert>
 
+    <!--숙소 이미지 조회-->
+    <select id="selectAccommodationImagesByAccommodationId" parameterType="int" resultType="AccommodationImage">
+        select * from accommodation_image where accommodation_id = #{accommodationId};
+    </select>
+
     <!--숙소 태그 등록-->
     <insert id="insertAccommodationTag" parameterType="Tags" useGeneratedKeys="true" keyProperty="id">
         insert into tags (accommodation_id, tag)
         values (#{accommodationId}, #{tag});
     </insert>
+
+    <!--숙소 태그 조회-->
+    <select id="selectAccommodationTagsByAccommodationId" parameterType="int" resultType="Tags">
+        select * from tags where accommodation_id = #{accommodationId};
+    </select>
 
     <!--편의시설 등록-->
     <insert id="insertAccommodationAmenity" parameterType="Amenities" useGeneratedKeys="true" keyProperty="id">
@@ -61,26 +99,42 @@
         values (#{accommodationId}, #{amenity});
     </insert>
 
-    <!--특정 편의시설에 달린 리뷰 조회-->
-    <select id="selectReviewsByAmenity" parameterType="map" resultType="Review">
-        select *
-        from review r
-        join accommodation_amenity_review aar
-        on r.id = aar.review_id
-        where aar.amenity_id = #{amenityId};
+    <!--숙소 편의시설 조회-->
+    <select id="selectAccommodationAmenitiesByAccommodationId" parameterType="int" resultType="Amenities">
+        select * from amenities where accommodation_id = #{accommodationId};
     </select>
 
-    <!--좋아요 조회-->
-    <select id="selectAccommodationLike" parameterType="map" resultType="Likes">
-        select * from accommodation_like
-        where accommodation_id=#{accommodationId} and user_id=#{userId};
-    </select>
+    <!--&lt;!&ndash;리뷰 조회&ndash;&gt;
+    <select id="selectReviewsByAmenity" resultType="Review">
+        select distinct review.*
+        from review
+        join reservation
+        on amenities.accommodation_id = reservation.accommodation_id
+        join review
+        on reservation.code = review.reservation_code
+        where amenities.accommodation_id = #{accommodationId}
+    </select>-->
 
     <!--좋아요 등록-->
     <insert id="insertAccommodationLike" parameterType="Likes" useGeneratedKeys="true" keyProperty="id">
-        insert into accommodation_like (accommodation_id, user_id)
-        values (#{accommodationId}, #{userId});
+        insert into likes (accommodation_id, account_id)
+        values (#{accommodationId}, #{accountId});
     </insert>
+
+    <!-- 숙소별 좋아요 수-->
+    <select id="selectLikeCountByAccommodation" parameterType="int" resultType="int">
+        select count(*)
+        from likes
+        where accommodation_id = #{accommodationId};
+    </select>
+
+    <!-- 좋아요 많은 순으로 숙소 목록 반환-->
+    <select id="selectAccommodationsOrderByLikeCount" parameterType="map" resultType="Likes">
+        select accommodation
+        from likes
+        group by accommodation_id
+        order by like_count desc
+    </select>
 
 
 </mapper>

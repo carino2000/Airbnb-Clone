@@ -3,6 +3,8 @@ package com.example.airbnb.dto.response.accommodation;
 import com.example.airbnb.domain.entity.AccommodationImage;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -10,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 public class AccommodationImageResponse {
 
-    AccommodationImage image;
+    List<AccommodationImage> image;
 
     boolean success;
 
