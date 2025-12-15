@@ -1,6 +1,6 @@
 package com.example.airbnb.dto.response.accommodation;
 
-import com.example.airbnb.domain.entity.Accommodation;
+
 import com.example.airbnb.domain.entity.Likes;
 import lombok.*;
 
@@ -12,6 +12,8 @@ import lombok.*;
 public class AccommodationInsertLikesResponse {
 
     Likes likes;
+
+    int likesCount;
 
     boolean success;
 }
