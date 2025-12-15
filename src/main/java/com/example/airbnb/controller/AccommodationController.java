@@ -1,9 +1,7 @@
 package com.example.airbnb.controller;
 
 import com.example.airbnb.domain.entity.*;
-import com.example.airbnb.dto.request.AccommodationImageRequest;
-import com.example.airbnb.dto.request.AccommodationRequest;
-import com.example.airbnb.dto.request.LikesRequest;
+import com.example.airbnb.dto.request.*;
 import com.example.airbnb.dto.response.accommodation.*;
 import com.example.airbnb.dto.response.accommodation.data.AccommodationDetail;
 import com.example.airbnb.mappers.AccommodationMapper;
@@ -108,6 +106,7 @@ public class AccommodationController {
         return AccommodationSelectAllResponse.builder()
                 .accommodations(allSelect)
                 .success(true)
+                .total(allSelect.size())
                 .build();
     }
 
@@ -244,18 +243,17 @@ public class AccommodationController {
     // 숙소 태그 등록
     @PostMapping("/{accommodationId}/tags")
     public AccommodationTagResponse addAccommodationTags(@PathVariable int accommodationId,
-                                                         @RequestBody List<String> tagsRequest) {
+                                                         @RequestBody TagsRequest tagsRequest) {
         List<Tags> savedTags = new ArrayList<>();
-        for (String tagText : tagsRequest) {
+        for (String tag : tagsRequest.getTags()) {
 
             Tags tags = new Tags();
             tags.setAccommodationId(accommodationId);
-            tags.setTag(tagText);
+            tags.setTag(tag);
 
             accommodationMapper.insertAccommodationTag(tags);
 
             savedTags.add(tags);
-
         }
 
 
@@ -268,10 +266,10 @@ public class AccommodationController {
     // 편의시설 등록
     @PostMapping("/{accommodationId}/amenities")
     public AccommodationAmenitiesResponse addAccommodationAmenities(@PathVariable int accommodationId,
-                                                                    @RequestBody List<String> amenitiesRequest) {
+                                                                    @RequestBody AmenitiesRequest amenitiesRequest) {
         List<Amenities> savedAmenities = new ArrayList<>();
 
-        for (String amenity : amenitiesRequest) {
+        for (String amenity : amenitiesRequest.getAmenities()) {
 
             Amenities amenities = new Amenities();
             amenities.setAccommodationId(accommodationId);

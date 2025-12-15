@@ -14,6 +14,6 @@ import java.util.List;
 public class AccommodationSelectAllResponse {
 
    List<AccommodationDetail> accommodations;
-
+    int total;
     boolean success;
 }
