@@ -67,6 +67,7 @@ public class AccommodationController {
             }
         }
 
+
         List<Accommodation> accommodationList;
 
         if (accommodations.isEmpty()) {
@@ -89,15 +90,26 @@ public class AccommodationController {
         List<Amenities> amenityList = new ArrayList<>();
         List<Likes> likesList = new ArrayList<>();
 
+
         if (accommodationList != null && !accommodationList.isEmpty()) {
             for (Accommodation accommodation : accommodationList) {
 
                 int accommodationId = accommodation.getId();
 
-                accommodationMapper.selectAccommodationImagesByAccommodationId(accommodationId);
-                accommodationMapper.selectAccommodationTagsByAccommodationId(accommodationId);
-                accommodationMapper.selectAccommodationAmenitiesByAccommodationId(accommodationId);
-                accommodationMapper.selectLikeCountByAccommodation(accommodationId);
+                List<AccommodationImage> imgs = accommodationMapper.selectAccommodationImagesByAccommodationId(accommodationId);
+                if (imgs != null) images.addAll(imgs);
+
+                List<Tags> tags = accommodationMapper.selectAccommodationTagsByAccommodationId(accommodationId);
+                if (tags != null) tagList.addAll(tags);
+
+                List<Amenities> amenities = accommodationMapper.selectAccommodationAmenitiesByAccommodationId(accommodationId);
+                if (amenities != null) amenityList.addAll(amenities);
+
+                int likes = accommodationMapper.selectLikeCountByAccommodation(accommodationId);
+                if (likes > 0) {
+                    Likes like = new Likes();
+                    likesList.add(like);
+                }
 
             }
         }
@@ -118,30 +130,22 @@ public class AccommodationController {
 
         Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
 
-        List<AccommodationImage> images = new ArrayList<>();
-        List<Tags> tagList = new ArrayList<>();
-        List<Amenities> amenityList = new ArrayList<>();
-        List<Likes> likesList = new ArrayList<>();
-
-        if (accommodation != null) {
-
-            accommodationMapper.selectAccommodationImagesByAccommodationId(accommodationId);
-            accommodationMapper.selectAccommodationTagsByAccommodationId(accommodationId);
-            accommodationMapper.selectAccommodationAmenitiesByAccommodationId(accommodationId);
-            accommodationMapper.selectLikeCountByAccommodation(accommodationId);
-
-        }
+        List<AccommodationImage> accommodationImages = accommodationMapper.selectAccommodationImagesByAccommodationId(accommodationId);
+        List<Tags> tags = accommodationMapper.selectAccommodationTagsByAccommodationId(accommodationId);
+        List<Amenities> amenities = accommodationMapper.selectAccommodationAmenitiesByAccommodationId(accommodationId);
+        int likes = accommodationMapper.selectLikeCountByAccommodation(accommodationId);
 
 
         return AccommodationSelectByIdResponse.builder()
                 .accommodation(accommodation)
-                .accommodationImages(images)
-                .tags(tagList)
-                .amenities(amenityList)
-                .likes(likesList)
+                .accommodationImages(accommodationImages)
+                .tags(tags)
+                .amenities(amenities)
+                .likes(likes)
                 .success(true)
                 .build();
     }
+
 
     // 숙소 생성
     @PostMapping

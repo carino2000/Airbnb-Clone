@@ -18,7 +18,7 @@ public class AccommodationSelectByIdResponse {
     List<AccommodationImage> accommodationImages;
     List<Tags> tags;
     List<Amenities> amenities;
-    List<Likes> likes;
+    int likes;
 
 
     boolean success;

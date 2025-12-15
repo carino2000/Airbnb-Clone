@@ -64,7 +64,7 @@ public interface AccommodationMapper {
     List<Review> selectReviewsByAmenity(int accommodationId);
 */
     // 좋아요 등록
-    int insertAccommodationLike(Likes likes);
+    Likes insertAccommodationLike(Likes likes);
 
     // 숙소별 좋아요 수
     int selectLikeCountByAccommodation( int accommodationId);
