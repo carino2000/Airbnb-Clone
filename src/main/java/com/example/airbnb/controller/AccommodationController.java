@@ -1,10 +1,9 @@
 package com.example.airbnb.controller;
 
 import com.example.airbnb.domain.entity.*;
-import com.example.airbnb.dto.request.AccommodationImageRequest;
-import com.example.airbnb.dto.request.AccommodationRequest;
-import com.example.airbnb.dto.request.LikesRequest;
+import com.example.airbnb.dto.request.*;
 import com.example.airbnb.dto.response.accommodation.*;
+import com.example.airbnb.dto.response.accommodation.data.AccommodationDetail;
 import com.example.airbnb.mappers.AccommodationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -67,6 +66,7 @@ public class AccommodationController {
             }
         }
 
+
         List<Accommodation> accommodationList;
 
         if (accommodations.isEmpty()) {
@@ -84,31 +84,29 @@ public class AccommodationController {
 
         }
 
-        List<AccommodationImage> images = new ArrayList<>();
-        List<Tags> tagList = new ArrayList<>();
-        List<Amenities> amenityList = new ArrayList<>();
-        List<Likes> likesList = new ArrayList<>();
+        List<AccommodationDetail> allSelect = new ArrayList<>();
+        for (Accommodation accommodation : accommodationList) {
+            AccommodationDetail detail = AccommodationDetail.fromEntity(accommodation);
 
-        if (accommodationList != null && !accommodationList.isEmpty()) {
-            for (Accommodation accommodation : accommodationList) {
+            int accommodationId = accommodation.getId();
+            List<AccommodationImage> images = accommodationMapper.selectAccommodationImagesByAccommodationId(accommodationId);
+            List<Tags> tags = accommodationMapper.selectAccommodationTagsByAccommodationId(accommodationId);
+            List<Amenities> amenities = accommodationMapper.selectAccommodationAmenitiesByAccommodationId(accommodationId);
+            int likes = accommodationMapper.selectLikeCountByAccommodation(accommodationId);
 
-                int accommodationId = accommodation.getId();
+            detail.setImages(images);
+            detail.setTags(tags);
+            detail.setAmenities(amenities);
+            detail.setLikes(likes);
 
-                accommodationMapper.selectAccommodationImagesByAccommodationId(accommodationId);
-                accommodationMapper.selectAccommodationTagsByAccommodationId(accommodationId);
-                accommodationMapper.selectAccommodationAmenitiesByAccommodationId(accommodationId);
-                accommodationMapper.selectLikeCountByAccommodation(accommodationId);
-
-            }
+            allSelect.add(detail);
         }
 
+
         return AccommodationSelectAllResponse.builder()
-                .accommodations(accommodationList)
-                .accommodationImages(images)
-                .tags(tagList)
-                .amenities(amenityList)
-                .likes(likesList)
+                .accommodations(allSelect)
                 .success(true)
+                .total(allSelect.size())
                 .build();
     }
 
@@ -117,31 +115,26 @@ public class AccommodationController {
     public AccommodationSelectByIdResponse selectAccommodationById(@PathVariable int accommodationId) {
 
         Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
+        AccommodationDetail accommodationDetail = AccommodationDetail.fromEntity(accommodation);
 
-        List<AccommodationImage> images = new ArrayList<>();
-        List<Tags> tagList = new ArrayList<>();
-        List<Amenities> amenityList = new ArrayList<>();
-        List<Likes> likesList = new ArrayList<>();
 
-        if (accommodation != null) {
+        List<AccommodationImage> accommodationImages = accommodationMapper.selectAccommodationImagesByAccommodationId(accommodationId);
+        List<Tags> tags = accommodationMapper.selectAccommodationTagsByAccommodationId(accommodationId);
+        List<Amenities> amenities = accommodationMapper.selectAccommodationAmenitiesByAccommodationId(accommodationId);
+        int likes = accommodationMapper.selectLikeCountByAccommodation(accommodationId);
 
-            accommodationMapper.selectAccommodationImagesByAccommodationId(accommodationId);
-            accommodationMapper.selectAccommodationTagsByAccommodationId(accommodationId);
-            accommodationMapper.selectAccommodationAmenitiesByAccommodationId(accommodationId);
-            accommodationMapper.selectLikeCountByAccommodation(accommodationId);
-
-        }
+        accommodationDetail.setImages(accommodationImages);
+        accommodationDetail.setTags(tags);
+        accommodationDetail.setAmenities(amenities);
+        accommodationDetail.setLikes(likes);
 
 
         return AccommodationSelectByIdResponse.builder()
-                .accommodation(accommodation)
-                .accommodationImages(images)
-                .tags(tagList)
-                .amenities(amenityList)
-                .likes(likesList)
+                .accommodation(accommodationDetail)
                 .success(true)
                 .build();
     }
+
 
     // 숙소 생성
     @PostMapping
@@ -250,18 +243,17 @@ public class AccommodationController {
     // 숙소 태그 등록
     @PostMapping("/{accommodationId}/tags")
     public AccommodationTagResponse addAccommodationTags(@PathVariable int accommodationId,
-                                                         @RequestBody List<String> tagsRequest) {
+                                                         @RequestBody TagsRequest tagsRequest) {
         List<Tags> savedTags = new ArrayList<>();
-        for (String tagText : tagsRequest) {
+        for (String tag : tagsRequest.getTags()) {
 
             Tags tags = new Tags();
             tags.setAccommodationId(accommodationId);
-            tags.setTag(tagText);
+            tags.setTag(tag);
 
             accommodationMapper.insertAccommodationTag(tags);
 
             savedTags.add(tags);
-
         }
 
 
@@ -274,10 +266,10 @@ public class AccommodationController {
     // 편의시설 등록
     @PostMapping("/{accommodationId}/amenities")
     public AccommodationAmenitiesResponse addAccommodationAmenities(@PathVariable int accommodationId,
-                                                                    @RequestBody List<String> amenitiesRequest) {
+                                                                    @RequestBody AmenitiesRequest amenitiesRequest) {
         List<Amenities> savedAmenities = new ArrayList<>();
 
-        for (String amenity : amenitiesRequest) {
+        for (String amenity : amenitiesRequest.getAmenities()) {
 
             Amenities amenities = new Amenities();
             amenities.setAccommodationId(accommodationId);
