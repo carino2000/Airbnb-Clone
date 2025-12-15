@@ -1,6 +1,7 @@
 package com.example.airbnb.dto.response.accommodation;
 
 import com.example.airbnb.domain.entity.*;
+import com.example.airbnb.dto.response.accommodation.data.AccommodationDetail;
 import lombok.*;
 
 import java.util.List;
@@ -13,12 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class AccommodationSelectByIdResponse {
 
-    Accommodation accommodation;
-
-    List<AccommodationImage> accommodationImages;
-    List<Tags> tags;
-    List<Amenities> amenities;
-    int likes;
+    AccommodationDetail accommodation;
 
 
     boolean success;
