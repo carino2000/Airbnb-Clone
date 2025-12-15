@@ -25,7 +25,7 @@ public class NewAccountRequest {
     String email;
 
     @NotBlank
-    String code;
+    String emailCode;
 
     String phoneNumber;
     String interestLocation;

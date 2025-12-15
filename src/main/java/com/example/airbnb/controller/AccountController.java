@@ -51,18 +51,18 @@ public class AccountController {
 
         Verification verification = verificationMapper.selectLatestByEmail(nar.getEmail());
         if (verification == null) {
-            resp.setMessage("email code can not found");
+            resp.setMessage("email emailCode can not found");
             return resp;
         }
 
         if (accountMapper.countDuplicateId(nar.getAccountId()) != 0) { // 아이디 중복일 때
             resp.setMessage("duplicate Id");
             System.out.println(resp.getMessage());
-        } else if (!verification.getCode().equals(nar.getCode())) { // 인증코드 불일치
-            resp.setMessage("verification code failed");
+        } else if (!verification.getCode().equals(nar.getEmailCode())) { // 인증코드 불일치
+            resp.setMessage("verification emailCode failed");
             System.out.println(resp.getMessage());
         } else if (verification.getExpiredAt().isBefore(LocalDateTime.now())) { // 인증코드 만료
-            resp.setMessage("verification code expired");
+            resp.setMessage("verification emailCode expired");
             System.out.println(resp.getMessage());
         } else { // 통과! insert
             BCryptPasswordEncoder pwEncoder = new BCryptPasswordEncoder();
@@ -82,10 +82,8 @@ public class AccountController {
     @PostMapping("/login")
     public AccountLoginResponse login(@RequestBody LoginRequest lr) {
         AccountLoginResponse resp = new AccountLoginResponse();
-        Account account = accountMapper.selectById(lr.getId());
+        Account account = accountMapper.selectById(lr.getAccountId());
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        System.out.println(lr.getId());
-        System.out.println(lr.getPw());
 
         if (account == null || !passwordEncoder.matches(lr.getPw(), account.getPw())) {
             resp.setSuccess(false);
