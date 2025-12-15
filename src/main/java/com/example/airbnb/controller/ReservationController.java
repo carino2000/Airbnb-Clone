@@ -235,6 +235,7 @@ public class ReservationController {
     @GetMapping("/test/{date}")
     public void test(@PathVariable LocalDate date) {
         System.out.println(apiUtil.holidayCheck(date));
+        // 사용법 : apiUtil.holidayCheck(날짜) => 매개변수로 LocalDate 넣으면 boolean값 반환
     }
 
 }
