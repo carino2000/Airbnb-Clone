@@ -12,6 +12,7 @@ import com.example.airbnb.dto.response.ReservationResponse;
 import com.example.airbnb.dto.response.SendMessageResponse;
 import com.example.airbnb.mappers.MessageMapper;
 import com.example.airbnb.mappers.ReservationMapper;
+import com.example.airbnb.util.ApiUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ import java.util.UUID;
 public class ReservationController {
     final ReservationMapper reservationMapper;
     final MessageMapper messageMapper;
+    final ApiUtil apiUtil;
 
     // 예약 정보 1건 조회
     @GetMapping("/{code}")
@@ -228,6 +230,11 @@ public class ReservationController {
         }
 
         return resp;
+    }
+
+    @GetMapping("/test/{date}")
+    public void test(@PathVariable LocalDate date) {
+        System.out.println(apiUtil.holidayCheck(date));
     }
 
 }
