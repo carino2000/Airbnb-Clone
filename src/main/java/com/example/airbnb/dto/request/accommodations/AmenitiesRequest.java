@@ -8,7 +8,5 @@ import java.util.List;
 @Getter
 @Setter
 public class AmenitiesRequest {
-    int id;
-    int accommodationId;
     List<String> amenities;
 }

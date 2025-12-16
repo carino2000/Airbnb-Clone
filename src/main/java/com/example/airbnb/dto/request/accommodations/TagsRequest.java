@@ -8,9 +8,5 @@ import java.util.List;
 @Getter
 @Setter
 public class TagsRequest {
-    int id;
-    int accommodationId;
     List<String> tags;
-
-
 }
