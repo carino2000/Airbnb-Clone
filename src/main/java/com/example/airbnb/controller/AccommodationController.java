@@ -211,11 +211,11 @@ public class AccommodationController {
 
         List<AccommodationImage> savedImages = new ArrayList<>();
 
-        List<MultipartFile> uri = accommodationImageRequest.getUri();
+        List<MultipartFile> uri = accommodationImageRequest.getImages();
 
         if (uri != null && !uri.isEmpty()) {
 
-            Path uplodadPath = Path.of(System.getProperty("user.home"), "accommodations", "images");
+            Path uplodadPath = Path.of(System.getProperty("user.home"), "accommodation", "images");
             Files.createDirectories(uplodadPath);
 
             for (MultipartFile file : uri) {
