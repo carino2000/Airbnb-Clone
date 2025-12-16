@@ -3,7 +3,21 @@ package com.example.airbnb.mappers;
 import com.example.airbnb.domain.entity.Message;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 @Mapper
 public interface MessageMapper {
-    int insertOne(Message message);
+
+    // 쪽지 작성
+    int insertMessage(Message message);
+
+    // 쪽지 조회
+    List<Message> selectMessage(String recipientId);
+
+    // 쪽지 삭제
+    int deleteMessage(int messageId);
+
+
+
+
 }

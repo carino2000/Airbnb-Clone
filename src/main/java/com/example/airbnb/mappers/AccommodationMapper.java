@@ -60,9 +60,9 @@ public interface AccommodationMapper {
     // 편의시설 조회
     List<Amenities> selectAccommodationAmenitiesByAccommodationId(int accommodationId);
 
-    /* // 리뷰 조회
-    List<Review> selectReviewsByAmenity(int accommodationId);
-*/
+     // 리뷰 조회
+     List<Review> selectReview(int accommodationId);
+
     // 좋아요 등록
     Likes insertAccommodationLike(Likes likes);
 

@@ -4,5 +4,25 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.airbnb.mappers.ReviewMapper">
 
+    <!-- 리뷰 작성 -->
+    <insert id="insertReview" parameterType="Review" keyProperty="id" useGeneratedKeys="true">
+        insert into review (account_id, reservation_code, rating, content)
+        values (#{accountId}, #{reservationCode}, #{rating}, #{content})
+    </insert>
+
+    <!-- 리뷰 조회 -->
+    <select id="selectReview" parameterType="String" resultType="Review">
+        select *
+        from review
+        where id = #{id}
+    </select>
+
+    <!-- 리뷰 삭제 -->
+    <delete id="deleteReview" parameterType="int">
+        delete
+        from review
+        where id = #{reviewId}
+    </delete>
+
 
 </mapper>

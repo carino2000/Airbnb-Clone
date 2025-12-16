@@ -1,17 +1,18 @@
 package com.example.airbnb.controller;
 
+import com.example.airbnb.domain.entity.Message;
 import com.example.airbnb.domain.entity.Reservation;
 import com.example.airbnb.domain.entity.ReservationDate;
+import com.example.airbnb.domain.entity.Review;
 import com.example.airbnb.domain.model.ReservationDateParam;
-import com.example.airbnb.domain.model.ReservationUpdateParam;
-import com.example.airbnb.dto.request.EditReservationRequest;
-import com.example.airbnb.dto.request.NewMessageRequest;
-import com.example.airbnb.dto.request.NewReservationRequest;
-import com.example.airbnb.dto.response.DeleteMessageResponse;
-import com.example.airbnb.dto.response.ReservationResponse;
-import com.example.airbnb.dto.response.SendMessageResponse;
+import com.example.airbnb.dto.request.reservations.EditReservationRequest;
+import com.example.airbnb.dto.request.reservations.NewMessageRequest;
+import com.example.airbnb.dto.request.reservations.NewReservationRequest;
+import com.example.airbnb.dto.request.reservations.ReviewRequest;
+import com.example.airbnb.dto.response.reservations.*;
 import com.example.airbnb.mappers.MessageMapper;
 import com.example.airbnb.mappers.ReservationMapper;
+import com.example.airbnb.mappers.ReviewMapper;
 import com.example.airbnb.util.ApiUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,6 +33,7 @@ public class ReservationController {
     final ReservationMapper reservationMapper;
     final MessageMapper messageMapper;
     final ApiUtil apiUtil;
+    final ReviewMapper reviewMapper;
 
     // 예약 정보 1건 조회
     @GetMapping("/{code}")
@@ -53,8 +56,7 @@ public class ReservationController {
     // 예약 정보 등록
     @PostMapping
     @Transactional
-    public ReservationResponse createReservation(@RequestBody @Valid NewReservationRequest nrr, BindingResult bindingResult,
-                                                 @RequestAttribute String tokenId) {
+    public ReservationResponse createReservation(@RequestBody @Valid NewReservationRequest nrr, BindingResult bindingResult, @RequestAttribute String tokenId) {
         ReservationResponse resp = new ReservationResponse();
         resp.setSuccess(false);
 
@@ -106,9 +108,7 @@ public class ReservationController {
     // 예약 정보 수정
     @PutMapping("/{code}")
     @Transactional
-    public ReservationResponse updateReservation(@PathVariable String code,
-                                                 @RequestBody @Valid EditReservationRequest err, BindingResult bindingResult,
-                                                 @RequestAttribute String tokenId) {
+    public ReservationResponse updateReservation(@PathVariable String code, @RequestBody @Valid EditReservationRequest err, BindingResult bindingResult, @RequestAttribute String tokenId) {
         ReservationResponse resp = new ReservationResponse();
         resp.setSuccess(false);
 
@@ -163,8 +163,7 @@ public class ReservationController {
     // 예약 정보 삭제
     @DeleteMapping("/{code}")
     @Transactional
-    public ReservationResponse deleteReservation(@PathVariable String code,
-                                                 @RequestAttribute String tokenId) {
+    public ReservationResponse deleteReservation(@PathVariable String code, @RequestAttribute String tokenId) {
         ReservationResponse resp = new ReservationResponse();
         resp.setSuccess(false);
 
@@ -200,8 +199,10 @@ public class ReservationController {
 
     // 메시지 전송
     @PostMapping("/messages")
-    public SendMessageResponse sendMessage(@RequestBody @Valid NewMessageRequest nmr, BindingResult bindingResult,
+    public SendMessageResponse sendMessage(@RequestBody @Valid NewMessageRequest nmr,
+                                           BindingResult bindingResult,
                                            @RequestAttribute String tokenId) {
+
         SendMessageResponse resp = new SendMessageResponse();
         resp.setSuccess(false);
 
@@ -220,7 +221,7 @@ public class ReservationController {
             return resp;
         }
 
-        int r = messageMapper.insertOne(nmr.toMessage());
+        int r = messageMapper.insertMessage(nmr.toMessage());
         if (r != 1) {
             resp.setMessage("Error in insert message");
         } else {
@@ -238,4 +239,59 @@ public class ReservationController {
         // 사용법 : apiUtil.holidayCheck(날짜) => 매개변수로 LocalDate 넣으면 boolean값 반환
     }
 
+    // 쪽지 삭제
+    @DeleteMapping("/messages/{messageId}/delete")
+    public DeleteMessageResponse deleteMessage(@PathVariable int messageId) {
+
+        int massage = messageMapper.deleteMessage(messageId);
+
+        return DeleteMessageResponse.builder()
+                .massageDelete(massage)
+                .success(true)
+                .build();
+    }
+
+    // 쪽지 조회
+    @GetMapping("/messages/{recipientId}/select")
+    public SelectMessagesResponse selectMessage(@PathVariable String recipientId) {
+
+        List<Message> messages = messageMapper.selectMessage(recipientId);
+
+
+        return SelectMessagesResponse.builder()
+                .messages(messages)
+                .success(true)
+                .build();
+    }
+
+    // 리뷰 작성
+    @PostMapping("/{reservationCode}/reviews")
+    public WriteReviewResponse createReview(@PathVariable String reservationCode,
+                                            @RequestBody ReviewRequest reviewRequest) {
+
+        Review review = new Review();
+        review.setReservationCode(reservationCode);
+        review.setRating(reviewRequest.getRating());
+        review.setContent(reviewRequest.getContent());
+
+        reviewMapper.insertReview(review);
+
+        return WriteReviewResponse.builder()
+                .review(review)
+                .success(true)
+                .build();
+    }
+
+    // 리뷰 삭제
+    @DeleteMapping("/{reviewId}/reviews")
+    public DeleteReviewResponse deleteReview(@PathVariable int reviewId) {
+
+        int review = reviewMapper.deleteReview(reviewId);
+
+
+        return DeleteReviewResponse.builder()
+                .review(review)
+                .success(true)
+                .build();
+    }
 }
