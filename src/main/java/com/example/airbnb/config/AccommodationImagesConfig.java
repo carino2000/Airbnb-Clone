@@ -10,8 +10,8 @@ import java.nio.file.Path;
 public class AccommodationImagesConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/accomodations/images/**").addResourceLocations(
-                Path.of(System.getProperty("user.home"), "accomodations", "images").toUri().toString()
+        registry.addResourceHandler("/accommodation/images/**").addResourceLocations(
+                Path.of(System.getProperty("user.home"), "accommodation", "images").toUri().toString()
         );
     }
 }
