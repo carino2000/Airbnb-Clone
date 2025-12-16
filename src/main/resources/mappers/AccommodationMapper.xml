@@ -104,16 +104,13 @@
         select * from amenities where accommodation_id = #{accommodationId};
     </select>
 
-    <!--&lt;!&ndash;리뷰 조회&ndash;&gt;
-    <select id="selectReviewsByAmenity" resultType="Review">
-        select distinct review.*
+    <!--리뷰 조회-->
+    <select id="selectReview" resultType="Review">
+        select *
         from review
-        join reservation
-        on amenities.accommodation_id = reservation.accommodation_id
-        join review
-        on reservation.code = review.reservation_code
-        where amenities.accommodation_id = #{accommodationId}
-    </select>-->
+        where id = #{accommodationId};
+
+    </select>
 
     <!--좋아요 등록-->
     <insert id="insertAccommodationLike" parameterType="Likes" useGeneratedKeys="true" keyProperty="id">

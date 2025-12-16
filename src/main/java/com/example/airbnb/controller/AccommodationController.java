@@ -1,9 +1,9 @@
 package com.example.airbnb.controller;
 
 import com.example.airbnb.domain.entity.*;
-import com.example.airbnb.dto.request.*;
-import com.example.airbnb.dto.response.accommodation.*;
-import com.example.airbnb.dto.response.accommodation.data.AccommodationDetail;
+import com.example.airbnb.dto.request.accommodations.*;
+import com.example.airbnb.dto.response.accommodations.*;
+import com.example.airbnb.dto.response.accommodations.data.AccommodationDetail;
 import com.example.airbnb.mappers.AccommodationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -287,20 +287,19 @@ public class AccommodationController {
                 .build();
     }
 
-   /* // 특정 숙소에 달린 리뷰 조회
+    // 리뷰 조회
 
     @GetMapping("/{accommodationId}/reviews")
-    public AccommodationReviewByAmenitiesResponse getAccommodationReviews(@PathVariable int accommodationId,
-                                                                          @RequestParam int amenityId) {
+    public SelectReviewResponse getAccommodationReviews(@PathVariable int accommodationId){
 
-        List<Review> reviews = accommodationMapper.selectReviewsByAmenity(accommodationId, amenityId);
+        List<Review> reviews = accommodationMapper.selectReview(accommodationId);
 
 
-        return AccommodationReviewByAmenitiesResponse.builder()
+        return SelectReviewResponse.builder()
                 .review(reviews)
                 .success(true)
                 .build();
-    }*/
+    }
 
     //좋아요 등록
     @PostMapping("/{accommodationId}/likes")

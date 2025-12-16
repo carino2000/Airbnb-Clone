@@ -14,4 +14,6 @@ public class Review {
     double rating;
     LocalDateTime writeAt;
     String content;
+
+
 }

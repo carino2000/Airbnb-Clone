@@ -1,0 +1,16 @@
+package com.example.airbnb.dto.response.accommodations;
+
+import com.example.airbnb.domain.entity.Accommodation;
+import lombok.*;
+
+
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class AccommodationEditResponse {
+    Accommodation accommodation;
+
+    boolean success;
+}

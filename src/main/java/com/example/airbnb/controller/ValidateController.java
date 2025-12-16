@@ -1,7 +1,7 @@
 package com.example.airbnb.controller;
 
 import com.example.airbnb.domain.entity.Verification;
-import com.example.airbnb.dto.request.NewEmailCodeRequest;
+import com.example.airbnb.dto.request.account.NewEmailCodeRequest;
 import com.example.airbnb.dto.response.DuplicateResponse;
 import com.example.airbnb.dto.response.EmailCodeResponse;
 import com.example.airbnb.mappers.AccountMapper;
