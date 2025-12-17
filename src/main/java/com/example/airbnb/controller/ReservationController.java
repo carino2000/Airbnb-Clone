@@ -240,7 +240,7 @@ public class ReservationController {
     }
 
     // 쪽지 삭제
-    @DeleteMapping("/messages/{messageId}/delete")
+    @DeleteMapping("/messages/{messageId}")
     public DeleteMessageResponse deleteMessage(@PathVariable int messageId) {
 
         int massage = messageMapper.deleteMessage(messageId);
@@ -252,7 +252,7 @@ public class ReservationController {
     }
 
     // 쪽지 조회
-    @GetMapping("/messages/{recipientId}/select")
+    @GetMapping("/messages/{recipientId}")
     public SelectMessagesResponse selectMessage(@PathVariable String recipientId) {
 
         List<Message> messages = messageMapper.selectMessage(recipientId);
