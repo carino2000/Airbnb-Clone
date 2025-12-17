@@ -1,16 +1,27 @@
 package com.example.airbnb.controller;
 
+import com.example.airbnb.domain.entity.Accommodation;
+import com.example.airbnb.domain.entity.Reservation;
 import com.example.airbnb.domain.entity.Verification;
 import com.example.airbnb.dto.request.account.NewEmailCodeRequest;
+import com.example.airbnb.dto.request.reservations.CheckReservationRequest;
+import com.example.airbnb.dto.response.CheckReservationResponse;
 import com.example.airbnb.dto.response.DuplicateResponse;
 import com.example.airbnb.dto.response.EmailCodeResponse;
+import com.example.airbnb.mappers.AccommodationMapper;
 import com.example.airbnb.mappers.AccountMapper;
+import com.example.airbnb.mappers.ReservationMapper;
 import com.example.airbnb.mappers.VerificationMapper;
+import com.example.airbnb.util.ApiUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @RestController
@@ -21,6 +32,9 @@ public class ValidateController {
     final AccountMapper accountMapper;
     final VerificationMapper verificationMapper;
     final JavaMailSender mailSender;
+    final ReservationMapper reservationMapper;
+    private final ApiUtil apiUtil;
+    final AccommodationMapper accommodationMapper;
 
     // 아이디 중복체크
     @GetMapping("/id")
@@ -74,5 +88,48 @@ public class ValidateController {
 
         mailSender.send(message);
         return new EmailCodeResponse(code, verification.getExpiredAt());
+    }
+
+    @GetMapping("/reservation")
+    public CheckReservationResponse checkReservationAvailable(@ModelAttribute @Valid CheckReservationRequest crr, BindingResult bindingResult) {
+        CheckReservationResponse resp = new CheckReservationResponse();
+        resp.setSuccess(false);
+        resp.setReservationAvailable(false);
+
+        if (bindingResult.hasErrors()) {
+            FieldError fe = bindingResult.getFieldError();
+            if (fe != null) {
+                resp.setMessage(fe.getField() + " 필드 오류: " + fe.getDefaultMessage());
+            } else {
+                resp.setMessage("요청 값 오류: " + bindingResult.getAllErrors().getFirst().getDefaultMessage());
+            }
+            return resp;
+        }
+
+        if (reservationMapper.countDuplicateDate(crr.toParam()) > 0) {
+            resp.setMessage("ReservationDate Duplicated");
+            return resp;
+        }
+
+        Accommodation accommodation = accommodationMapper.selectAccommodationById(crr.getAccommodationId());
+        if(accommodation==null){
+            resp.setMessage("accommodation Not Found");
+            return resp;
+        }
+
+        int totalPrice = 0;
+        for (LocalDate date = crr.getStartDate(); date.isBefore(crr.getEndDate()); date = date.plusDays(1)) {
+            if(apiUtil.holidayCheck(date)){
+                totalPrice += (int)(accommodation.getPrice() * (accommodation.getExtraRate() + 1));
+            }else{
+                totalPrice += accommodation.getPrice();
+            }
+        }
+
+        resp.setReservationAvailable(true);
+        resp.setMessage("Reservation Available");
+        resp.setTotalPrice(totalPrice);
+
+        return resp;
     }
 }
