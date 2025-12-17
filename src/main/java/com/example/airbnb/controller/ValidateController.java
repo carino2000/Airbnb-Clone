@@ -118,6 +118,13 @@ public class ValidateController {
             resp.setMessage("ReservationDate Duplicated");
             return resp;
         }
+        if(crr.getVisitors() > accommodation.getMaxCapacity()){
+            resp.setMessage("Max Capacity Exceeded");
+            return resp;
+        }
+
+        System.out.println(crr.getStartDate());
+        System.out.println(crr.getEndDate());
 
         int totalPrice = 0;
         for (LocalDate date = crr.getStartDate(); date.isBefore(crr.getEndDate()); date = date.plusDays(1)) {
