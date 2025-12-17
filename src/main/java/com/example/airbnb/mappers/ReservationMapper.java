@@ -10,11 +10,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import java.util.List;
+
 @Mapper
 public interface ReservationMapper {
     int insertOne (Reservation reservation);
     int insertReservationDate(ReservationDate reservationDate);
     Reservation selectOne(String code);
+    List<Reservation> selectReservationByAccommodationId(int accommodationId);
+
     int countDuplicateDate(ReservationDateParam params);
 
     int deleteReservationByCode(String code);

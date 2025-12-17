@@ -282,12 +282,10 @@ public class AccommodationController {
     }
 
     // 리뷰 조회
-
     @GetMapping("/{accommodationId}/reviews")
     public SelectReviewResponse getAccommodationReviews(@PathVariable int accommodationId) {
 
-        List<Review> reviews = accommodationMapper.selectReview(accommodationId);
-
+        List<Review> reviews = reviewMapper.selectReviewByAccommodation(accommodationId);
 
         return SelectReviewResponse.builder()
                 .review(reviews)

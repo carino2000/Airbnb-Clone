@@ -12,6 +12,8 @@ public interface ReviewMapper {
     // 리뷰 작성
     int insertReview(Review review);
 
+    List<Review> selectReviewByAccommodation(int accommodationId);
+
     // 리뷰 삭제
     int deleteReview(int reviewId);
 
