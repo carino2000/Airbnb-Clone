@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -119,8 +118,8 @@ public class AccommodationController {
         accommodationDetail.setAmenities(amenities);
         accommodationDetail.setLikes(likes);
 
-        accommodationDetail.setJoinAt(account.getJoinAt());
-        accommodationDetail.setDate(reservedDate);
+        accommodationDetail.setHostJoinAt(account.getJoinAt());
+        accommodationDetail.setReservedDate(reservedDate);
         accommodationDetail.setAverageRating(averageRating);
 
 

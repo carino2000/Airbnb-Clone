@@ -33,8 +33,8 @@ public class AccommodationDetail {
     int likes;
     List<Amenities> amenities;
 
-    LocalDateTime joinAt;
-    List<LocalDate> date;
+    LocalDateTime hostJoinAt;
+    List<LocalDate> reservedDate;
     Double averageRating;
 
 
