@@ -41,11 +41,11 @@
         from reservation
     </select>
 
-    <!-- 모든 예약의 날짜 범위 조회-->
+  <!--  &lt;!&ndash; 모든 예약의 날짜 범위 조회&ndash;&gt;
     <select id="selectAllReservationRanges" resultType="Reservation">
         select accommodation_id as accommodationId, start_date as checkInDate, end_date as checkOutDate
         from reservation
-    </select>
+    </select>-->
 
 
     <!-- 숙소 상세 조회(숙소 Id - 단건)-->
@@ -147,6 +147,7 @@
         group by accommodation_id
         order by like_count desc
     </select>
+
 
 
 </mapper>

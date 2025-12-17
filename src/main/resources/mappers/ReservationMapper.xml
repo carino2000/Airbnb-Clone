@@ -36,4 +36,11 @@
         update reservation set visitors=#{visitors}, start_date=#{startDate}, end_date=#{endDate}, price=#{price} where code=#{code}
     </update>
 
+   <!-- 예약 불가 일자(숙소별 이미 예약된 날짜) 조회 -->
+   <select id="selectReservationsDateByAccommodationId" parameterType="int" resultType="java.time.LocalDate">
+       select date
+       from reservation_date
+       where accommodation_id = #{accommodationId}
+   </select>
+
 </mapper>

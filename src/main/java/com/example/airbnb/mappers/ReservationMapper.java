@@ -5,7 +5,10 @@ import com.example.airbnb.domain.entity.ReservationDate;
 import com.example.airbnb.domain.model.ReservationDateParam;
 import com.example.airbnb.domain.model.ReservationUpdateParam;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import java.util.List;
 
@@ -21,4 +24,10 @@ public interface ReservationMapper {
     int deleteReservationByCode(String code);
     int deleteReservationDate(ReservationDateParam params);
     int updateReservation(ReservationUpdateParam params);
+
+
+
+    // 예약 불가 일자(숙소별 이미 예약된 날짜) 조회
+    List<LocalDate> selectReservationsDateByAccommodationId(int accommodationId);
+
 }
