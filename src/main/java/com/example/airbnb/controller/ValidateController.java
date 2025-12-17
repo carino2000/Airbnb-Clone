@@ -106,14 +106,16 @@ public class ValidateController {
             return resp;
         }
 
-        if (reservationMapper.countDuplicateDate(crr.toParam()) > 0) {
-            resp.setMessage("ReservationDate Duplicated");
-            return resp;
-        }
-
         Accommodation accommodation = accommodationMapper.selectAccommodationById(crr.getAccommodationId());
         if(accommodation==null){
             resp.setMessage("accommodation Not Found");
+            return resp;
+        }
+
+
+        resp.setSuccess(true);
+        if (reservationMapper.countDuplicateDate(crr.toParam()) > 0) {
+            resp.setMessage("ReservationDate Duplicated");
             return resp;
         }
 
@@ -126,7 +128,7 @@ public class ValidateController {
             }
         }
 
-        resp.setSuccess(true);
+
         resp.setReservationAvailable(true);
         resp.setMessage("Reservation Available");
         resp.setTotalPrice(totalPrice);
