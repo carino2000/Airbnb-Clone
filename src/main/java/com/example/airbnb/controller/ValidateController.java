@@ -126,6 +126,7 @@ public class ValidateController {
             }
         }
 
+        resp.setSuccess(true);
         resp.setReservationAvailable(true);
         resp.setMessage("Reservation Available");
         resp.setTotalPrice(totalPrice);
