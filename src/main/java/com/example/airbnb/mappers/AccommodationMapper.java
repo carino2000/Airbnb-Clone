@@ -1,12 +1,8 @@
 package com.example.airbnb.mappers;
 
-import com.example.airbnb.domain.entity.Accommodation;
-import com.example.airbnb.domain.entity.AccommodationImage;
-import com.example.airbnb.domain.entity.Amenities;
-import com.example.airbnb.domain.entity.Likes;
-import com.example.airbnb.domain.entity.Review;
-import com.example.airbnb.domain.entity.Tags;
+import com.example.airbnb.domain.entity.*;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,15 +13,20 @@ public interface AccommodationMapper {
     List<Accommodation> selectAllAccommodations();
 
     // destination 기준 숙소 조회
-    List<Integer> selectAccommodationsByDestination(String destination);
+    List<Accommodation> selectAccommodationsByDestination(String destination);
+
+
+    // 인원수 기준 숙소 조회
+    List<Accommodation> selectAccommodationsByCapacity(int guest);
+
 
     // 이미 예약되어 예약 불가능한 숙소 조회
-    List<Integer> selectUnavailableAccommodationsByDate(LocalDate checkInDate,
-                                                        LocalDate checkOutDate);
+    List<Reservation> selectUnavailableAccommodationsByDate(LocalDate checkInDate,
+                                                            LocalDate checkOutDate);
 
-    // 날짜 기준 예약 불가능 숙소 조회 (다양한 겹침 케이스 포함)
-    List<Integer> selectUnavailableAccommodations(LocalDate checkInDate,
-                                                  LocalDate checkOutDate);
+    // 날짜 기준 예약 불가능 숙소 조회 ()
+    List<Accommodation> selectAccommodationsByDuration(@Param("checkInDate") LocalDate checkInDate,
+                                                       @Param("checkOutDate")LocalDate checkOutDate);
 
     // 숙소 상세 조회(단건)
     Accommodation selectAccommodationById(int id);
@@ -71,5 +72,6 @@ public interface AccommodationMapper {
 
     // 좋아요 많은 순으로 숙소 목록 반환
     List<Accommodation> selectAccommodationsOrderByLikeCount();
+
 
 }

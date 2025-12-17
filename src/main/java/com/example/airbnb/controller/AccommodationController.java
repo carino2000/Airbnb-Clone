@@ -33,59 +33,31 @@ public class AccommodationController {
             @RequestParam(required = false) Integer guests
     ) {
 
-        List<Integer> accommodations = new ArrayList<>();
+        List<Accommodation> accommodations = accommodationMapper.selectAllAccommodations();
 
+
+        // 목적지를 만족하는 데이터 조회
         if (destination != null && !destination.isBlank()) {
-            List<Integer> idsByDestination
+            List<Accommodation> accommodationsByArea
                     = accommodationMapper.selectAccommodationsByDestination(destination);
-            accommodations.addAll(idsByDestination);
-
-        } else {
-            List<Accommodation> all = accommodationMapper.selectAllAccommodations();
-            for (Accommodation accommodation : all) {
-                accommodations.add(accommodation.getId());
-            }
+            accommodations.retainAll(accommodationsByArea);
         }
 
+        // 인원수를 만족하는 데이터 조회
         if (guests != null && guests > 0) {
-            List<Integer> fits = new ArrayList<>();
-            List<Accommodation> all = accommodationMapper.selectAllAccommodations();
-            for (Accommodation accommodation : all) {
-                if (accommodation.getMaxCapacity() >= guests) {
-                    fits.add(accommodation.getId());
-                }
-            }
-            accommodations.retainAll(fits);
+            List<Accommodation> accommodationsByGuest = accommodationMapper.selectAccommodationsByCapacity(guests);
+            accommodations.retainAll(accommodationsByGuest);
         }
 
+        // 예약(날짜)이 가능한 데이터 조회
         if (checkInDate != null && checkOutDate != null) {
-            List<Integer> reserved
-                    = accommodationMapper.selectUnavailableAccommodationsByDate(checkInDate, checkOutDate);
-            if (reserved != null && !reserved.isEmpty()) {
-                accommodations.removeAll(reserved);
-            }
+            List<Accommodation> accommodationsByDuration = accommodationMapper.selectAccommodationsByDuration(checkInDate, checkOutDate);
+            accommodations.retainAll(accommodationsByDuration);
         }
 
-
-        List<Accommodation> accommodationList;
-
-        if (accommodations.isEmpty()) {
-            accommodationList = new ArrayList<>();
-        } else {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < accommodations.size(); i++) {
-                if (i > 0) {
-                    sb.append(",");
-                }
-                sb.append(accommodations.get(i));
-            }
-            String ids = sb.toString();
-            accommodationList = accommodationMapper.selectAccommodationsByIds(ids);
-
-        }
 
         List<AccommodationDetail> allSelect = new ArrayList<>();
-        for (Accommodation accommodation : accommodationList) {
+        for (Accommodation accommodation : accommodations) {
             AccommodationDetail detail = AccommodationDetail.fromEntity(accommodation);
 
             int accommodationId = accommodation.getId();
@@ -290,7 +262,7 @@ public class AccommodationController {
     // 리뷰 조회
 
     @GetMapping("/{accommodationId}/reviews")
-    public SelectReviewResponse getAccommodationReviews(@PathVariable int accommodationId){
+    public SelectReviewResponse getAccommodationReviews(@PathVariable int accommodationId) {
 
         List<Review> reviews = accommodationMapper.selectReview(accommodationId);
 

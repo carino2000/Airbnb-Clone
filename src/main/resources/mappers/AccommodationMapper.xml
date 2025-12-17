@@ -10,15 +10,31 @@
     </select>
 
     <!-- destination 기준 숙소 조회 -->
-    <select id="selectAccommodationsByDestination" parameterType="string" resultType="int">
-        select accommodation.id
+    <select id="selectAccommodationsByDestination" parameterType="string" resultType="Accommodation">
+        select *
         from accommodation
         where accommodation.address like concat('%', #{destination}, '%');
     </select>
 
-    <!-- 예약의 날짜 범위만 반환 -->
-    <select id="selectUnavailableAccommodationsByDate" resultType="ReservationDate">
-        select distinct
+    <!-- destination 기준 숙소 조회 -->
+    <select id="selectAccommodationsByCapacity" parameterType="int" resultType="Accommodation">
+        select *
+        from accommodation
+        where max_capacity >= #{guest};
+    </select>
+
+
+    <!-- 예약된 날짜 범위만 반환 -->
+    <select id="selectAccommodationsByDuration" resultType="Accommodation">
+        select * from accommodation
+        where id
+        not in (select accommodation_id from reservation_date
+             where date between #{checkInDate} and #{checkOutDate}
+        );
+    </select>
+    <!-- 예약된 날짜 범위만 반환 -->
+    <select id="selectUnavailableAccommodationsByDate" resultType="Reservation">
+        select
         accommodation_id as accommodationId,
         start_date as checkInDate,
         end_date as checkOutDate
@@ -26,7 +42,7 @@
     </select>
 
     <!-- 모든 예약의 날짜 범위 조회-->
-    <select id="selectAllReservationRanges" resultType="ReservationDate">
+    <select id="selectAllReservationRanges" resultType="Reservation">
         select accommodation_id as accommodationId, start_date as checkInDate, end_date as checkOutDate
         from reservation
     </select>
