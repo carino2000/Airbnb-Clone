@@ -4,9 +4,17 @@ import com.example.airbnb.domain.entity.Message;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface MessageMapper {
+    Message selectLastMessageByCode(Map<String, String> map);
+
+    List<Message> selectMessageByCode(String reservationCode);
+
+    int countMessageReadFlagByCode(String reservationCode);
+
+    int updateMessageReadFlagById(int id);
 
     // 쪽지 작성
     int insertMessage(Message message);
@@ -16,8 +24,6 @@ public interface MessageMapper {
 
     // 쪽지 삭제
     int deleteMessage(int messageId);
-
-
 
 
 }

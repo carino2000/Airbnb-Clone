@@ -11,8 +11,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SelectMessagesResponse {
-
-    List<Message> messages;
     boolean success;
+    String message;
+    List<Message> messages;
 }
 

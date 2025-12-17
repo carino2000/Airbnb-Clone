@@ -1,15 +1,14 @@
 package com.example.airbnb.controller;
 
-import com.example.airbnb.domain.entity.Message;
-import com.example.airbnb.domain.entity.Reservation;
-import com.example.airbnb.domain.entity.ReservationDate;
-import com.example.airbnb.domain.entity.Review;
+import com.example.airbnb.domain.entity.*;
 import com.example.airbnb.domain.model.ReservationDateParam;
+import com.example.airbnb.dto.projection.MessageRoom;
 import com.example.airbnb.dto.request.reservations.EditReservationRequest;
 import com.example.airbnb.dto.request.reservations.NewMessageRequest;
 import com.example.airbnb.dto.request.reservations.NewReservationRequest;
 import com.example.airbnb.dto.request.reservations.ReviewRequest;
 import com.example.airbnb.dto.response.reservations.*;
+import com.example.airbnb.mappers.AccommodationMapper;
 import com.example.airbnb.mappers.MessageMapper;
 import com.example.airbnb.mappers.ReservationMapper;
 import com.example.airbnb.mappers.ReviewMapper;
@@ -22,8 +21,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @RestController
 @RequestMapping("/reservations")
@@ -34,6 +33,7 @@ public class ReservationController {
     final MessageMapper messageMapper;
     final ApiUtil apiUtil;
     final ReviewMapper reviewMapper;
+    private final AccommodationMapper accommodationMapper;
 
     // 예약 정보 1건 조회
     @GetMapping("/{code}")
@@ -233,10 +233,108 @@ public class ReservationController {
         return resp;
     }
 
-    @GetMapping("/test/{date}")
-    public void test(@PathVariable LocalDate date) {
-        System.out.println(apiUtil.holidayCheck(date));
-        // 사용법 : apiUtil.holidayCheck(날짜) => 매개변수로 LocalDate 넣으면 boolean값 반환
+    //카톡방? 리스트 가져오기
+    @GetMapping("/messages/list/{accountId}")
+    public SelectMessageListResponse selectMessageList(@PathVariable String accountId,
+                                                       @RequestAttribute String tokenId) {
+        SelectMessageListResponse resp = new SelectMessageListResponse();
+
+        if (!tokenId.equals(accountId)) {
+            resp.setMessage("invalid token");
+            return resp;
+        }
+
+        List<MessageRoom> messageRooms = new ArrayList<MessageRoom>();
+
+        // 숙소 호스트가 accountId인 숙소 전체 추출 -> 예약 테이블에서 해당 숙소 번호로 된 예약건 전체 가져오기
+        List<Accommodation> accommodations = accommodationMapper.selectAccommodationByHostId(accountId);
+        Set<Integer> accommodationIds = new HashSet<>();
+        for (Accommodation accommodation : accommodations) {
+            accommodationIds.add(accommodation.getId());
+            List<Reservation> list = reservationMapper.selectReservationByAccommodationId(accommodation.getId());
+            for (Reservation reservation : list) {
+                if (!accountId.equals(reservation.getAccountId())) {
+                    MessageRoom room = new MessageRoom();
+                    room.setReservationCode(reservation.getCode());
+                    room.setRecipientId(reservation.getAccountId());
+
+                    Map<String, String> map = Map.of("reservationCode", reservation.getCode(), "accountId", accountId);
+
+                    Message lastMsg = messageMapper.selectLastMessageByCode(map);
+                    if (lastMsg != null) {
+                        room.setLastMessage(lastMsg.getContent());
+                        room.setLastReceiveTime(lastMsg.getWriteAt());
+                        int unReadCnt = messageMapper.countMessageReadFlagByCode(reservation.getCode());
+                        room.setUnReadCount(unReadCnt);
+                    } else {
+                        room.setLastMessage("아직 대화가 없습니다");
+                        room.setLastReceiveTime(LocalDateTime.now());
+                        room.setUnReadCount(0);
+                    }
+
+                    messageRooms.add(room);
+                }
+            }
+        }
+
+        List<Reservation> myReservation = reservationMapper.selectReservationByAccountId(accountId);
+        for (Reservation r : myReservation) {
+            if (!accommodationIds.contains(r.getAccommodationId())) {
+                Accommodation a = accommodationMapper.selectAccommodationById(r.getAccommodationId());
+
+                MessageRoom room = new MessageRoom();
+                room.setReservationCode(r.getCode());
+                room.setRecipientId(a.getHostId());
+
+                Map<String, String> map = Map.of("reservationCode", r.getCode(), "accountId", a.getHostId());
+
+                Message lastMsg = messageMapper.selectLastMessageByCode(map);
+                if (lastMsg != null) {
+                    room.setLastMessage(lastMsg.getContent());
+                    room.setLastReceiveTime(lastMsg.getWriteAt());
+                    room.setUnReadCount(lastMsg.isReadFlag() ? 0 : 1);
+                } else {
+                    room.setLastMessage("새로운 대화를 시작해보세요!");
+                    room.setLastReceiveTime(LocalDateTime.now());
+                    room.setUnReadCount(0);
+                }
+                messageRooms.add(room);
+            }
+        }
+
+        resp.setSuccess(true);
+        resp.setMessage("MessageList Select Complete");
+        resp.setMessageRooms(messageRooms);
+
+        return resp;
+    }
+
+    //카톡방? 1개 대화 내역 가져오기
+    @GetMapping("/message/{reservationCode}")
+    public SelectMessagesResponse selectMessage(@PathVariable String reservationCode,
+                                                @RequestAttribute String tokenId) {
+        SelectMessagesResponse resp = new SelectMessagesResponse();
+        resp.setSuccess(false);
+
+        if (tokenId == null) {
+            resp.setMessage("invalid token");
+            return resp;
+        }
+
+        List<Message> messages = messageMapper.selectMessageByCode(reservationCode);
+        if(messages.isEmpty()){
+            resp.setMessage("message not found");
+            return resp;
+        }else{
+            for(Message m : messages){
+                messageMapper.updateMessageReadFlagById(m.getId());
+            }
+            resp.setSuccess(true);
+            resp.setMessage("Message Select Complete");
+            resp.setMessages(messages);
+        }
+
+        return resp;
     }
 
     // 쪽지 삭제

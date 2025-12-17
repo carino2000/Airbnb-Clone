@@ -18,6 +18,9 @@
     <select id="selectReservationByAccommodationId" parameterType="int" resultType="Reservation">
         select * from reservation where accommodation_id=#{accommodationId}
     </select>
+    <select id="selectReservationByAccountId" resultType="Reservation" parameterType="string">
+        select * from reservation where account_id=#{accountId}
+    </select>
 
     <select id="countDuplicateDate" parameterType="ReservationDateParam">
         select count(*) as cnt from reservation_date where accommodation_id=#{accommodationId} and date between #{startDate} and #{endDate}
