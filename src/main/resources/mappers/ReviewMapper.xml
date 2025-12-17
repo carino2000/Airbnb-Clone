@@ -6,8 +6,8 @@
 
     <!-- 리뷰 작성 -->
     <insert id="insertReview" parameterType="Review" keyProperty="id" useGeneratedKeys="true">
-        insert into review (account_id, reservation_code, rating, content)
-        values (#{accountId}, #{reservationCode}, #{rating}, #{content})
+        insert into review (accommodation_id, account_id, reservation_code, rating, content)
+        values (#{accommodationId}, #{accountId}, #{reservationCode}, #{rating}, #{content})
     </insert>
 
     <!-- 리뷰 조회 -->
@@ -15,6 +15,10 @@
         select *
         from review
         where id = #{id}
+    </select>
+
+    <select id="selectReviewByAccommodation" parameterType="int" resultType="Review">
+        select * from review where accommodation_id=#{accommodationId}
     </select>
 
     <!-- 리뷰 삭제 -->
