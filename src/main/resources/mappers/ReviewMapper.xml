@@ -24,5 +24,14 @@
         where id = #{reviewId}
     </delete>
 
+    <!-- 숙소별 별점(rating) 평균 조회 -->
+    <select id="selectAverageRatingByAccommodationId" parameterType="int" resultType="double">
+        select avg(review.rating) as average_rating
+        from review
+        join reservation
+        on review.reservation_code = reservation.code
+        where reservation.accommodation_id = #{accommodationId}
+    </select>
+
 
 </mapper>

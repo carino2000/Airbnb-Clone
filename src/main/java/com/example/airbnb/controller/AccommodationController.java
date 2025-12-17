@@ -5,6 +5,9 @@ import com.example.airbnb.dto.request.accommodations.*;
 import com.example.airbnb.dto.response.accommodations.*;
 import com.example.airbnb.dto.response.accommodations.data.AccommodationDetail;
 import com.example.airbnb.mappers.AccommodationMapper;
+import com.example.airbnb.mappers.AccountMapper;
+import com.example.airbnb.mappers.ReservationMapper;
+import com.example.airbnb.mappers.ReviewMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +27,9 @@ import java.util.UUID;
 @RequestMapping("/accommodations")
 public class AccommodationController {
     final AccommodationMapper accommodationMapper;
+    final AccountMapper accountMapper;
+    final ReservationMapper reservationMapper;
+    private final ReviewMapper reviewMapper;
 
     // 검색 필터링 or 필터링 없는 숙소 전체 조회
     @GetMapping
@@ -86,7 +93,9 @@ public class AccommodationController {
     @GetMapping("/{accommodationId}")
     public AccommodationSelectByIdResponse selectAccommodationById(@PathVariable int accommodationId) {
 
+
         Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
+
         AccommodationDetail accommodationDetail = AccommodationDetail.fromEntity(accommodation);
 
 
@@ -95,10 +104,24 @@ public class AccommodationController {
         List<Amenities> amenities = accommodationMapper.selectAccommodationAmenitiesByAccommodationId(accommodationId);
         int likes = accommodationMapper.selectLikeCountByAccommodation(accommodationId);
 
+        Account account = accountMapper.selectById(accommodation.getHostId());
+
+        List<LocalDate> reservedDate = reservationMapper.selectReservationsDateByAccommodationId(accommodationId);
+
+        Double averageRating = reviewMapper.selectAverageRatingByAccommodationId(accommodationId);
+        if (averageRating == null) {
+            averageRating = 0.0;
+        }
+
+
         accommodationDetail.setImages(accommodationImages);
         accommodationDetail.setTags(tags);
         accommodationDetail.setAmenities(amenities);
         accommodationDetail.setLikes(likes);
+
+        accommodationDetail.setJoinAt(account.getJoinAt());
+        accommodationDetail.setDate(reservedDate);
+        accommodationDetail.setAverageRating(averageRating);
 
 
         return AccommodationSelectByIdResponse.builder()
@@ -312,10 +335,8 @@ public class AccommodationController {
         List<Accommodation> rows = accommodationMapper.selectAccommodationsOrderByLikeCount();
 
         return AccommodationMostLikesResponse.builder()
-
                 .success(true)
                 .mostLikedAccommodations(rows)
                 .build();
     }
 }
-

@@ -6,6 +6,8 @@ import com.example.airbnb.domain.entity.Amenities;
 import com.example.airbnb.domain.entity.Tags;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -30,6 +32,13 @@ public class AccommodationDetail {
     List<Tags> tags;
     int likes;
     List<Amenities> amenities;
+
+    LocalDateTime joinAt;
+    List<LocalDate> date;
+    Double averageRating;
+
+
+
 
     public static AccommodationDetail fromEntity(Accommodation accommodation) {
         return AccommodationDetail.builder()
