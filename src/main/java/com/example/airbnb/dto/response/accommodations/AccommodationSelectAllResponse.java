@@ -1,6 +1,8 @@
 package com.example.airbnb.dto.response.accommodations;
 
 import com.example.airbnb.dto.response.accommodations.data.AccommodationDetail;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
 
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonPropertyOrder({"success", "total", "accommodations"})
 public class AccommodationSelectAllResponse {
 
    List<AccommodationDetail> accommodations;
