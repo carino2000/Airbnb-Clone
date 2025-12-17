@@ -8,11 +8,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class ReviewRequest {
-    int id;
+    int accommodationId;
     String accountId;
     String reservationCode;
     double rating;
-    LocalDateTime writeAt;
     String content;
-
 }

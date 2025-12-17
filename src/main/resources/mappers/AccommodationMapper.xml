@@ -125,7 +125,6 @@
         select *
         from review
         where id = #{accommodationId};
-
     </select>
 
     <!--좋아요 등록-->

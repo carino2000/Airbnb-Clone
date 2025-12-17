@@ -5,6 +5,8 @@ import com.example.airbnb.dto.request.accommodations.*;
 import com.example.airbnb.dto.response.accommodations.*;
 import com.example.airbnb.dto.response.accommodations.data.AccommodationDetail;
 import com.example.airbnb.mappers.AccommodationMapper;
+import com.example.airbnb.mappers.ReservationMapper;
+import com.example.airbnb.mappers.ReviewMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +25,8 @@ import java.util.UUID;
 @RequestMapping("/accommodations")
 public class AccommodationController {
     final AccommodationMapper accommodationMapper;
+    private final ReservationMapper reservationMapper;
+    private final ReviewMapper reviewMapper;
 
     // 검색 필터링 or 필터링 없는 숙소 전체 조회
     @GetMapping
@@ -260,12 +264,10 @@ public class AccommodationController {
     }
 
     // 리뷰 조회
-
     @GetMapping("/{accommodationId}/reviews")
     public SelectReviewResponse getAccommodationReviews(@PathVariable int accommodationId) {
 
-        List<Review> reviews = accommodationMapper.selectReview(accommodationId);
-
+        List<Review> reviews = reviewMapper.selectReviewByAccommodation(accommodationId);
 
         return SelectReviewResponse.builder()
                 .review(reviews)

@@ -270,9 +270,11 @@ public class ReservationController {
                                             @RequestBody ReviewRequest reviewRequest) {
 
         Review review = new Review();
+        review.setAccommodationId(reviewRequest.getAccommodationId());
         review.setReservationCode(reservationCode);
         review.setRating(reviewRequest.getRating());
         review.setContent(reviewRequest.getContent());
+        review.setAccountId(reviewRequest.getAccountId());
 
         reviewMapper.insertReview(review);
 
