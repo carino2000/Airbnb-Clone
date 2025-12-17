@@ -9,6 +9,9 @@ import java.util.List;
 
 @Mapper
 public interface AccommodationMapper {
+
+    List<Accommodation> selectAccommodationByHostId(String hostId);
+
     // 필터링 없는 숙소 전체 조회
     List<Accommodation> selectAllAccommodations();
 

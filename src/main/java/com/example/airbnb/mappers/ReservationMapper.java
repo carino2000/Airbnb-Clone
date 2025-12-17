@@ -14,17 +14,23 @@ import java.util.List;
 
 @Mapper
 public interface ReservationMapper {
-    int insertOne (Reservation reservation);
+    int insertOne(Reservation reservation);
+
     int insertReservationDate(ReservationDate reservationDate);
+
     Reservation selectOne(String code);
+
     List<Reservation> selectReservationByAccommodationId(int accommodationId);
+
+    List<Reservation> selectReservationByAccountId(String accountId);
 
     int countDuplicateDate(ReservationDateParam params);
 
     int deleteReservationByCode(String code);
-    int deleteReservationDate(ReservationDateParam params);
-    int updateReservation(ReservationUpdateParam params);
 
+    int deleteReservationDate(ReservationDateParam params);
+
+    int updateReservation(ReservationUpdateParam params);
 
 
     // 예약 불가 일자(숙소별 이미 예약된 날짜) 조회
