@@ -353,11 +353,11 @@ public class ReservationController {
     @GetMapping("/messages/{recipientId}")
     public SelectMessagesResponse selectMessage(@PathVariable String recipientId) {
 
-        List<Message> messages = messageMapper.selectMessage(recipientId);
+        List<Message> messagesList = messageMapper.selectMessage(recipientId);
 
 
         return SelectMessagesResponse.builder()
-                .messages(messages)
+                .messages(messagesList)
                 .success(true)
                 .build();
     }
@@ -365,7 +365,7 @@ public class ReservationController {
     // 리뷰 작성
     @PostMapping("/{reservationCode}/reviews")
     public WriteReviewResponse createReview(@PathVariable String reservationCode,
-                                            @RequestBody ReviewRequest reviewRequest) {
+                                            @Valid @RequestBody ReviewRequest reviewRequest) {
 
         Review review = new Review();
         review.setAccommodationId(reviewRequest.getAccommodationId());
