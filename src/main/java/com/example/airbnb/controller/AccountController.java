@@ -198,7 +198,7 @@ public class AccountController {
             resp.setMessage("old password is incorrect.");
         } else if (epr.getOldPw().equals(epr.getNewPw())) {
             resp.setMessage("already using password.");
-        } else if (epr.getNewPw().equals(epr.getNewPwConfirm())) {
+        } else if (!epr.getNewPw().equals(epr.getNewPwConfirm())) {
             resp.setMessage("confirm password does not match.");
         } else {
             Map<String, String> map = Map.of("id", accountId, "pw", passwordEncoder.encode(epr.getNewPw()));

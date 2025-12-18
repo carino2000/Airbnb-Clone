@@ -1,6 +1,8 @@
 package com.example.airbnb.controller;
 
 import com.example.airbnb.domain.entity.*;
+import com.example.airbnb.domain.model.AccommodationAndImage;
+import com.example.airbnb.domain.model.AccommodationStatsInfo;
 import com.example.airbnb.dto.request.accommodations.*;
 import com.example.airbnb.dto.response.accommodations.*;
 import com.example.airbnb.dto.response.accommodations.data.AccommodationDetail;
@@ -9,6 +11,7 @@ import com.example.airbnb.mappers.AccountMapper;
 import com.example.airbnb.mappers.ReservationMapper;
 import com.example.airbnb.mappers.ReviewMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @CrossOrigin
 @RestController
 @RequiredArgsConstructor
@@ -293,6 +297,29 @@ public class AccommodationController {
                 .build();
     }
 
+    //아이디 별 좋아요 조회
+    @GetMapping("/{accountId}/likes/list")
+    public AccommodationMyLikesResponse selectMyAccommodationLikes(@PathVariable String accountId) {
+        AccommodationMyLikesResponse resp = new AccommodationMyLikesResponse();
+        resp.setSuccess(true);
+
+        List<Likes> savedLikes = accommodationMapper.selectMyLikesByAccountId(accountId);
+        List<Integer> likesIds = new ArrayList<>();
+        List<AccommodationAndImage> accommodations = new ArrayList<>();
+        for (Likes likes : savedLikes) {
+            likesIds.add(likes.getAccommodationId());
+            Accommodation accommodation = accommodationMapper.selectAccommodationById(likes.getAccommodationId());
+            List<AccommodationImage> list = accommodationMapper.selectAccommodationImagesByAccommodationId(likes.getAccommodationId());
+            accommodations.add(accommodation.toAccommodationAndImage(list.getFirst().getUri()));
+        }
+
+        resp.setMessage("select my likes successfully");
+        resp.setAccommodationId(likesIds);
+        resp.setAccommodations(accommodations);
+
+        return resp;
+    }
+
     //좋아요 등록
     @PostMapping("/{accommodationId}/likes")
     public AccommodationSelectLikesResponse addAccommodationLike(@PathVariable int accommodationId,
@@ -309,6 +336,23 @@ public class AccommodationController {
         return AccommodationSelectLikesResponse.builder()
                 .success(true)
                 .build();
+    }
+
+    //좋아요 취소
+    @DeleteMapping("/{accommodationId}/likes")
+    public AccommodationLikeDeleteResponse deleteAccommodationLike(@PathVariable int accommodationId,
+                                                                   @RequestBody LikesRequest likesRequest) {
+        AccommodationLikeDeleteResponse resp = new AccommodationLikeDeleteResponse();
+
+        Likes likes = new Likes();
+        likes.setAccommodationId(accommodationId);
+        likes.setAccountId(likesRequest.getAccountId());
+        accommodationMapper.deleteAccommodationLike(likes);
+
+        resp.setSuccess(true);
+        resp.setMessage("like delete success");
+
+        return resp;
     }
 
     // 숙소별 좋아요 수
@@ -335,5 +379,36 @@ public class AccommodationController {
                 .success(true)
                 .mostLikedAccommodations(rows)
                 .build();
+    }
+
+    @GetMapping("/{accountId}/hosting")
+    public SelectHostingListResponse getHostingList(@PathVariable String accountId) {
+        SelectHostingListResponse resp = new SelectHostingListResponse();
+        resp.setSuccess(true);
+        List<AccommodationAndImage> list = accommodationMapper.selectAccommodationAndImageByHostId(accountId);
+        if (list.isEmpty()) {
+            resp.setMessage("accommodation not found");
+            resp.setAccommodations(null);
+        } else {
+            resp.setMessage("get accommodation list success");
+            resp.setAccommodations(list);
+        }
+        return resp;
+    }
+
+    @GetMapping("/stats-info")
+    public AccommodationStatsInfoResponse getAccommodationStatsInfo() {
+        AccommodationStatsInfoResponse resp = new AccommodationStatsInfoResponse();
+
+        resp.setSuccess(true);
+        resp.setMessage("get accommodation stats info success");
+        resp.setAccommodationStatisticalInfoList(accommodationMapper.selectAccommodationStatsInfo());
+        int totalCount = 0;
+        for(AccommodationStatsInfo info : resp.getAccommodationStatisticalInfoList()) {
+            totalCount += info.getAccommodationCount();
+        }
+        resp.setTotalCount(totalCount);
+
+        return resp;
     }
 }

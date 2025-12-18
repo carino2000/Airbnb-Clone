@@ -235,8 +235,10 @@ public class ReservationController {
 
     //카톡방? 리스트 가져오기
     @GetMapping("/messages/list/{accountId}")
-    public SelectMessageListResponse selectMessageList(@PathVariable String accountId,
-                                                       @RequestAttribute String tokenId) {
+    public SelectMessageListResponse selectMessageList(
+            @PathVariable String accountId,
+            @RequestAttribute String tokenId) {
+
         SelectMessageListResponse resp = new SelectMessageListResponse();
 
         if (!tokenId.equals(accountId)) {
@@ -244,70 +246,86 @@ public class ReservationController {
             return resp;
         }
 
-        List<MessageRoom> messageRooms = new ArrayList<MessageRoom>();
-
-        // 숙소 호스트가 accountId인 숙소 전체 추출 -> 예약 테이블에서 해당 숙소 번호로 된 예약건 전체 가져오기
-        List<Accommodation> accommodations = accommodationMapper.selectAccommodationByHostId(accountId);
+        List<MessageRoom> messageRooms = new ArrayList<>();
+        Set<String> usedReservationCodes = new HashSet<>();
         Set<Integer> accommodationIds = new HashSet<>();
+
+        /* ================== HOST 입장 ================== */
+        List<Accommodation> accommodations =
+                accommodationMapper.selectAccommodationByHostId(accountId);
+
         for (Accommodation accommodation : accommodations) {
             accommodationIds.add(accommodation.getId());
-            List<Reservation> list = reservationMapper.selectReservationByAccommodationId(accommodation.getId());
-            for (Reservation reservation : list) {
-                if (!accountId.equals(reservation.getAccountId())) {
-                    MessageRoom room = new MessageRoom();
-                    room.setReservationCode(reservation.getCode());
-                    room.setRecipientId(reservation.getAccountId());
 
-                    Map<String, String> map = Map.of("reservationCode", reservation.getCode(), "accountId", accountId);
+            List<Reservation> reservations =
+                    reservationMapper.selectReservationByAccommodationId(accommodation.getId());
 
-                    Message lastMsg = messageMapper.selectLastMessageByCode(map);
-                    if (lastMsg != null) {
-                        room.setLastMessage(lastMsg.getContent());
-                        room.setLastReceiveTime(lastMsg.getWriteAt());
-                        int unReadCnt = messageMapper.countMessageReadFlagByCode(reservation.getCode());
-                        room.setUnReadCount(unReadCnt);
-                    } else {
-                        room.setLastMessage("아직 대화가 없습니다");
-                        room.setLastReceiveTime(LocalDateTime.now());
-                        room.setUnReadCount(0);
-                    }
+            for (Reservation reservation : reservations) {
+                if (accountId.equals(reservation.getAccountId())) continue;
+                if (usedReservationCodes.contains(reservation.getCode())) continue;
 
-                    messageRooms.add(room);
-                }
-            }
-        }
-
-        List<Reservation> myReservation = reservationMapper.selectReservationByAccountId(accountId);
-        for (Reservation r : myReservation) {
-            if (!accommodationIds.contains(r.getAccommodationId())) {
-                Accommodation a = accommodationMapper.selectAccommodationById(r.getAccommodationId());
+                usedReservationCodes.add(reservation.getCode());
 
                 MessageRoom room = new MessageRoom();
-                room.setReservationCode(r.getCode());
-                room.setRecipientId(a.getHostId());
+                room.setReservationCode(reservation.getCode());
+                room.setRecipientId(reservation.getAccountId());
 
-                Map<String, String> map = Map.of("reservationCode", r.getCode(), "accountId", a.getHostId());
-
-                Message lastMsg = messageMapper.selectLastMessageByCode(map);
+                Message lastMsg = messageMapper.selectLastMessageByCode(reservation.getCode());
                 if (lastMsg != null) {
                     room.setLastMessage(lastMsg.getContent());
                     room.setLastReceiveTime(lastMsg.getWriteAt());
-                    room.setUnReadCount(lastMsg.isReadFlag() ? 0 : 1);
+                    room.setUnReadCount(
+                            messageMapper.countMessageReadFlagByCode(reservation.getCode())
+                    );
                 } else {
-                    room.setLastMessage("새로운 대화를 시작해보세요!");
+                    room.setLastMessage("아직 대화가 없습니다");
                     room.setLastReceiveTime(LocalDateTime.now());
                     room.setUnReadCount(0);
                 }
+
                 messageRooms.add(room);
             }
+        }
+
+        /* ================== GUEST 입장 ================== */
+        List<Reservation> myReservations =
+                reservationMapper.selectReservationByAccountId(accountId);
+
+        for (Reservation r : myReservations) {
+            if (accommodationIds.contains(r.getAccommodationId())) continue;
+            if (usedReservationCodes.contains(r.getCode())) continue;
+
+            usedReservationCodes.add(r.getCode());
+
+            Accommodation a =
+                    accommodationMapper.selectAccommodationById(r.getAccommodationId());
+
+            MessageRoom room = new MessageRoom();
+            room.setReservationCode(r.getCode());
+            room.setRecipientId(a.getHostId());
+
+            Message lastMsg = messageMapper.selectLastMessageByCode(r.getCode());
+            if (lastMsg != null) {
+                room.setLastMessage(lastMsg.getContent());
+                room.setLastReceiveTime(lastMsg.getWriteAt());
+                room.setUnReadCount(
+                        messageMapper.countMessageReadFlagByCode(r.getCode())
+                );
+            } else {
+                room.setLastMessage("새로운 대화를 시작해보세요!");
+                room.setLastReceiveTime(LocalDateTime.now());
+                room.setUnReadCount(0);
+            }
+
+            messageRooms.add(room);
         }
 
         resp.setSuccess(true);
         resp.setMessage("MessageList Select Complete");
         resp.setMessageRooms(messageRooms);
-
         return resp;
     }
+
 
     //카톡방? 1개 대화 내역 가져오기
     @GetMapping("/message/{reservationCode}")
@@ -365,7 +383,8 @@ public class ReservationController {
     // 리뷰 작성
     @PostMapping("/{reservationCode}/reviews")
     public WriteReviewResponse createReview(@PathVariable String reservationCode,
-                                            @RequestBody ReviewRequest reviewRequest) {
+                                            @RequestBody ReviewRequest reviewRequest,
+                                            @RequestAttribute String tokenId) {
 
         Review review = new Review();
         review.setAccommodationId(reviewRequest.getAccommodationId());

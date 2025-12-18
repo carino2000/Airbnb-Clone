@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 public class ReviewRequest {
     int accommodationId;
     String accountId;
-    String reservationCode;
     double rating;
     String content;
 }
