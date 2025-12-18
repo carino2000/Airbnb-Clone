@@ -8,6 +8,7 @@ import com.example.airbnb.mappers.AccommodationMapper;
 import com.example.airbnb.mappers.AccountMapper;
 import com.example.airbnb.mappers.ReservationMapper;
 import com.example.airbnb.mappers.ReviewMapper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -132,7 +133,7 @@ public class AccommodationController {
 
     // 숙소 생성
     @PostMapping
-    public AccommodationCreateResponse createAccommodation(@RequestBody AccommodationRequest accommodationRequest) {
+    public AccommodationCreateResponse createAccommodation(@Valid @RequestBody AccommodationRequest accommodationRequest) {
         Accommodation accommodation = new Accommodation();
         accommodation.setId(accommodationRequest.getId());
         accommodation.setHostId(accommodationRequest.getHostId());
@@ -157,7 +158,7 @@ public class AccommodationController {
     // 숙소 수정
     @PutMapping("/{accommodationId}")
     public AccommodationEditResponse updateAccommodation(@PathVariable int accommodationId,
-                                                         @RequestBody AccommodationRequest accommodationRequest) {
+                                                         @Valid @RequestBody AccommodationRequest accommodationRequest) {
 
         Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
 
@@ -194,7 +195,7 @@ public class AccommodationController {
     // 숙소 이미지 등록
     @PostMapping(value = "/{accommodationId}/images")
     public AccommodationImageResponse uploadAccommodationImages(@PathVariable int accommodationId,
-                                                                @ModelAttribute AccommodationImageRequest accommodationImageRequest
+                                                                @Valid @ModelAttribute AccommodationImageRequest accommodationImageRequest
     ) throws IOException {
 
         Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
@@ -237,7 +238,7 @@ public class AccommodationController {
     // 숙소 태그 등록
     @PostMapping("/{accommodationId}/tags")
     public AccommodationTagResponse addAccommodationTags(@PathVariable int accommodationId,
-                                                         @RequestBody TagsRequest tagsRequest) {
+                                                         @Valid @RequestBody TagsRequest tagsRequest) {
         List<Tags> savedTags = new ArrayList<>();
         for (String tag : tagsRequest.getTags()) {
 
@@ -260,7 +261,7 @@ public class AccommodationController {
     // 편의시설 등록
     @PostMapping("/{accommodationId}/amenities")
     public AccommodationAmenitiesResponse addAccommodationAmenities(@PathVariable int accommodationId,
-                                                                    @RequestBody AmenitiesRequest amenitiesRequest) {
+                                                                    @Valid @RequestBody AmenitiesRequest amenitiesRequest) {
         List<Amenities> savedAmenities = new ArrayList<>();
 
         for (String amenity : amenitiesRequest.getAmenities()) {
@@ -296,7 +297,7 @@ public class AccommodationController {
     //좋아요 등록
     @PostMapping("/{accommodationId}/likes")
     public AccommodationSelectLikesResponse addAccommodationLike(@PathVariable int accommodationId,
-                                                                 @RequestBody LikesRequest likesRequest) {
+                                                                 @Valid @RequestBody LikesRequest likesRequest) {
 
         String accountId = likesRequest.getAccountId();
 
