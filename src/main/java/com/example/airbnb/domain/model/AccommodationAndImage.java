@@ -1,11 +1,12 @@
-package com.example.airbnb.dto.request.accommodations;
+package com.example.airbnb.domain.model;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class AccommodationRequest {
+public class AccommodationAndImage {
+    int id;
     String hostId;
     String name;
     String description;
@@ -16,4 +17,6 @@ public class AccommodationRequest {
     int bedroom;
     int bed;
     int bathroom;
+
+    String uri;
 }

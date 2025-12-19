@@ -1,6 +1,8 @@
 package com.example.airbnb.mappers;
 
 import com.example.airbnb.domain.entity.*;
+import com.example.airbnb.domain.model.AccommodationAndImage;
+import com.example.airbnb.domain.model.AccommodationStatsInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -11,6 +13,8 @@ import java.util.List;
 public interface AccommodationMapper {
 
     List<Accommodation> selectAccommodationByHostId(String hostId);
+
+    List<AccommodationAndImage> selectAccommodationAndImageByHostId(String hostId);
 
     // 필터링 없는 숙소 전체 조회
     List<Accommodation> selectAllAccommodations();
@@ -29,7 +33,7 @@ public interface AccommodationMapper {
 
     // 날짜 기준 예약 불가능 숙소 조회 ()
     List<Accommodation> selectAccommodationsByDuration(@Param("checkInDate") LocalDate checkInDate,
-                                                       @Param("checkOutDate")LocalDate checkOutDate);
+                                                       @Param("checkOutDate") LocalDate checkOutDate);
 
     // 숙소 상세 조회(단건)
     Accommodation selectAccommodationById(int id);
@@ -49,6 +53,9 @@ public interface AccommodationMapper {
     // 숙소 이미지 등록
     int insertAccommodationImage(AccommodationImage accommodationImage);
 
+    // 숙소 이미지 삭제
+    int deleteAccommodationImage(int id);
+
     // 숙소 이미지 조회
     List<AccommodationImage> selectAccommodationImagesByAccommodationId(int accommodationId);
 
@@ -58,23 +65,34 @@ public interface AccommodationMapper {
     // 숙소 태그 조회
     List<Tags> selectAccommodationTagsByAccommodationId(int accommodationId);
 
+    // 태그 삭제
+    int deleteAccommodationTags(int accommodationId);
+
     // 편의시설 등록
     int insertAccommodationAmenity(Amenities amenities);
+
+    // 편의시설 삭제
+    int deleteAccommodationAmenities(int accommodationId);
 
     // 편의시설 조회
     List<Amenities> selectAccommodationAmenitiesByAccommodationId(int accommodationId);
 
-     // 리뷰 조회
-     List<Review> selectReview(int accommodationId);
+    // 리뷰 조회
+    List<Review> selectReview(int accommodationId);
 
     // 좋아요 등록
-    Likes insertAccommodationLike(Likes likes);
+    List<Likes> selectMyLikesByAccountId(String accountId);
+
+    int insertAccommodationLike(Likes likes);
+
+    int deleteAccommodationLike(Likes likes);
 
     // 숙소별 좋아요 수
-    int selectLikeCountByAccommodation( int accommodationId);
+    int selectLikeCountByAccommodation(int accommodationId);
 
     // 좋아요 많은 순으로 숙소 목록 반환
     List<Accommodation> selectAccommodationsOrderByLikeCount();
 
+    List<AccommodationStatsInfo> selectAccommodationStatsInfo();
 
 }

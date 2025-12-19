@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Mapper
 public interface MessageMapper {
-    Message selectLastMessageByCode(Map<String, String> map);
+    Message selectLastMessageByCode(String reservationCode);
 
     List<Message> selectMessageByCode(String reservationCode);
 

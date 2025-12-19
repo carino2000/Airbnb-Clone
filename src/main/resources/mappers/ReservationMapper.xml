@@ -15,6 +15,25 @@
     <select id="selectOne" parameterType="string" resultType="Reservation">
         select * from reservation where code=#{code}
     </select>
+
+    <select id="selectReservationAndAccommodationByAccountId" parameterType="String">
+        SELECT
+        r.*,
+        a.name, a.description, a.address,
+        ai.uri AS image_uri
+        FROM reservation r
+        JOIN accommodation a
+        ON r.accommodation_id = a.id
+        LEFT JOIN accommodation_image ai
+        ON ai.id = (
+        SELECT MIN(id)
+        FROM accommodation_image
+        WHERE accommodation_id = a.id
+        )
+        WHERE r.account_id = #{accountId} order by r.end_date desc;
+    </select>
+
+
     <select id="selectReservationByAccommodationId" parameterType="int" resultType="Reservation">
         select * from reservation where accommodation_id=#{accommodationId}
     </select>

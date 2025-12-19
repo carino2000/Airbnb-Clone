@@ -1,5 +1,6 @@
 package com.example.airbnb.domain.entity;
 
+import com.example.airbnb.domain.model.AccommodationAndImage;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,4 +21,21 @@ public class Accommodation {
     int bedroom;
     int bed;
     int bathroom;
+
+    public AccommodationAndImage toAccommodationAndImage(String image) {
+        AccommodationAndImage accommodation = new AccommodationAndImage();
+        accommodation.setId(id);
+        accommodation.setHostId(hostId);
+        accommodation.setName(name);
+        accommodation.setDescription(description);
+        accommodation.setPrice(price);
+        accommodation.setAddress(address);
+        accommodation.setExtraRate(extraRate);
+        accommodation.setMaxCapacity(maxCapacity);
+        accommodation.setBedroom(bedroom);
+        accommodation.setBed(bed);
+        accommodation.setBathroom(bathroom);
+        accommodation.setUri(image);
+        return accommodation;
+    }
 }

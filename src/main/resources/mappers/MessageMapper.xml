@@ -5,8 +5,7 @@
 <mapper namespace="com.example.airbnb.mappers.MessageMapper">
 
     <select id="selectLastMessageByCode" parameterType="string" resultType="Message">
-        select * from message where reservation_code=#{reservationCode}
-        and recipient_id=#{accountId} order by write_at desc limit 1;
+        select * from message where reservation_code=#{reservationCode} order by write_at desc limit 1;
     </select>
     <select id="selectMessageByCode" parameterType="string" resultType="Message">
         select * from message where reservation_code=#{reservationCode} order by write_at asc

@@ -107,18 +107,30 @@ public class ValidateController {
         }
 
         Accommodation accommodation = accommodationMapper.selectAccommodationById(crr.getAccommodationId());
-        if(accommodation==null){
+        if (accommodation == null) {
             resp.setMessage("accommodation Not Found");
             return resp;
         }
 
 
         resp.setSuccess(true);
+
+        int totalPrice = 0;
+        for (LocalDate date = crr.getStartDate(); date.isBefore(crr.getEndDate()); date = date.plusDays(1)) {
+            if (apiUtil.holidayCheck(date)) {
+                totalPrice += (int) (accommodation.getPrice() * (accommodation.getExtraRate() + 1));
+            } else {
+                totalPrice += accommodation.getPrice();
+            }
+        }
+        resp.setTotalPrice(totalPrice);
+
+
         if (reservationMapper.countDuplicateDate(crr.toParam()) > 0) {
             resp.setMessage("ReservationDate Duplicated");
             return resp;
         }
-        if(crr.getVisitors() > accommodation.getMaxCapacity()){
+        if (crr.getVisitors() > accommodation.getMaxCapacity()) {
             resp.setMessage("Max Capacity Exceeded");
             return resp;
         }
@@ -126,19 +138,9 @@ public class ValidateController {
         System.out.println(crr.getStartDate());
         System.out.println(crr.getEndDate());
 
-        int totalPrice = 0;
-        for (LocalDate date = crr.getStartDate(); date.isBefore(crr.getEndDate()); date = date.plusDays(1)) {
-            if(apiUtil.holidayCheck(date)){
-                totalPrice += (int)(accommodation.getPrice() * (accommodation.getExtraRate() + 1));
-            }else{
-                totalPrice += accommodation.getPrice();
-            }
-        }
-
-
         resp.setReservationAvailable(true);
         resp.setMessage("Reservation Available");
-        resp.setTotalPrice(totalPrice);
+
 
         return resp;
     }
