@@ -138,7 +138,6 @@ public class AccommodationController {
     @PostMapping
     public AccommodationCreateResponse createAccommodation(@RequestBody AccommodationRequest accommodationRequest) {
         Accommodation accommodation = new Accommodation();
-        accommodation.setId(accommodationRequest.getId());
         accommodation.setHostId(accommodationRequest.getHostId());
         accommodation.setName(accommodationRequest.getName());
         accommodation.setDescription(accommodationRequest.getDescription());
@@ -161,24 +160,36 @@ public class AccommodationController {
     // 숙소 수정
     @PutMapping("/{accommodationId}")
     public AccommodationEditResponse updateAccommodation(@PathVariable int accommodationId,
-                                                         @RequestBody AccommodationRequest accommodationRequest) {
+                                                         @RequestBody AccommodationEditRequest aer) {
 
-        Accommodation accommodation = accommodationMapper.selectAccommodationById(accommodationId);
+        // -------------------- 숙소 수정 --------------------
+        accommodationMapper.updateAccommodation(aer.toAccommodation(accommodationId));
 
-        accommodation.setName(accommodationRequest.getName());
-        accommodation.setDescription(accommodationRequest.getDescription());
-        accommodation.setPrice(accommodationRequest.getPrice());
-        accommodation.setAddress(accommodationRequest.getAddress());
-        accommodation.setExtraRate(accommodationRequest.getExtraRate());
-        accommodation.setMaxCapacity(accommodationRequest.getMaxCapacity());
-        accommodation.setBedroom(accommodationRequest.getBedroom());
-        accommodation.setBed(accommodationRequest.getBed());
-        accommodation.setBathroom(accommodationRequest.getBathroom());
+        // -------------------- 숙소 태그 정보 수정 --------------------
+        accommodationMapper.deleteAccommodationTags(accommodationId);
+        for (String tag : aer.getTags()) {
+            Tags tags = new Tags();
+            tags.setAccommodationId(accommodationId);
+            tags.setTag(tag);
+            accommodationMapper.insertAccommodationTag(tags);
+        }
 
-        accommodationMapper.updateAccommodation(accommodation);
+        // -------------------- 숙소 편의시설 정보 수정 --------------------
+        accommodationMapper.deleteAccommodationAmenities(accommodationId);
+        for (String amenity : aer.getAmenities()) {
+            Amenities amenities = new Amenities();
+            amenities.setAccommodationId(accommodationId);
+            amenities.setAmenity(amenity);
+            accommodationMapper.insertAccommodationAmenity(amenities);
+        }
+
+        // -------------------- 숙소 이미지 수정(삭제) --------------------
+        for(int i : aer.getDeleteImageId()){
+            accommodationMapper.deleteAccommodationImage(i);
+        }
 
         return AccommodationEditResponse.builder()
-                .accommodation(accommodation)
+                .accommodation(aer.toAccommodation(accommodationId))
                 .success(true)
                 .build();
     }

@@ -53,6 +53,9 @@ public interface AccommodationMapper {
     // 숙소 이미지 등록
     int insertAccommodationImage(AccommodationImage accommodationImage);
 
+    // 숙소 이미지 삭제
+    int deleteAccommodationImage(int id);
+
     // 숙소 이미지 조회
     List<AccommodationImage> selectAccommodationImagesByAccommodationId(int accommodationId);
 
@@ -62,8 +65,14 @@ public interface AccommodationMapper {
     // 숙소 태그 조회
     List<Tags> selectAccommodationTagsByAccommodationId(int accommodationId);
 
+    // 태그 삭제
+    int deleteAccommodationTags(int accommodationId);
+
     // 편의시설 등록
     int insertAccommodationAmenity(Amenities amenities);
+
+    // 편의시설 삭제
+    int deleteAccommodationAmenities(int accommodationId);
 
     // 편의시설 조회
     List<Amenities> selectAccommodationAmenitiesByAccommodationId(int accommodationId);

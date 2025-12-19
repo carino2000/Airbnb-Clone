@@ -108,6 +108,9 @@
         insert into accommodation_image (accommodation_id, uri)
         values (#{accommodationId}, #{uri});
     </insert>
+    <delete id="deleteAccommodationImage" parameterType="int">
+        delete from accommodation_image where id=#{id}
+    </delete>
 
     <!--숙소 이미지 조회-->
     <select id="selectAccommodationImagesByAccommodationId" parameterType="int" resultType="AccommodationImage">
@@ -119,6 +122,9 @@
         insert into tags (accommodation_id, tag)
         values (#{accommodationId}, #{tag});
     </insert>
+    <delete id="deleteAccommodationTags" parameterType="int">
+        delete from tags where accommodation_id=#{accommodationId};
+    </delete>
 
     <!--숙소 태그 조회-->
     <select id="selectAccommodationTagsByAccommodationId" parameterType="int" resultType="Tags">
@@ -130,6 +136,9 @@
         insert into amenities (accommodation_id, amenity)
         values (#{accommodationId}, #{amenity});
     </insert>
+    <delete id="deleteAccommodationAmenities" parameterType="int">
+        delete from amenities where accommodation_id=#{accommodationId}
+    </delete>
 
     <!--숙소 편의시설 조회-->
     <select id="selectAccommodationAmenitiesByAccommodationId" parameterType="int" resultType="Amenities">

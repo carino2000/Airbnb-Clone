@@ -6,7 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AccommodationRequest {
-    int id;
     String hostId;
     String name;
     String description;

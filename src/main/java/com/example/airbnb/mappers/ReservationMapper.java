@@ -2,6 +2,7 @@ package com.example.airbnb.mappers;
 
 import com.example.airbnb.domain.entity.Reservation;
 import com.example.airbnb.domain.entity.ReservationDate;
+import com.example.airbnb.domain.model.ReservationAndAccommodationAndImage;
 import com.example.airbnb.domain.model.ReservationDateParam;
 import com.example.airbnb.domain.model.ReservationUpdateParam;
 import org.apache.ibatis.annotations.Mapper;
@@ -19,6 +20,8 @@ public interface ReservationMapper {
     int insertReservationDate(ReservationDate reservationDate);
 
     Reservation selectOne(String code);
+
+    List<ReservationAndAccommodationAndImage> selectReservationAndAccommodationByAccountId(String accountId);
 
     List<Reservation> selectReservationByAccommodationId(int accommodationId);
 

@@ -53,10 +53,29 @@ public class ReservationController {
         return resp;
     }
 
+    // 내 전체 예약 기록 조회
+    @GetMapping("/{accountId}/history")
+    public SelectReservationListResponse getMyReservations(@PathVariable String accountId,
+                                                           @RequestAttribute String tokenId) {
+        SelectReservationListResponse resp = new SelectReservationListResponse();
+        resp.setSuccess(false);
+        if (!tokenId.equals(accountId)) {
+            resp.setMessage("invalid token");
+            return resp;
+        }
+        resp.setSuccess(true);
+        resp.setMessage("Reservations found successfully");
+        resp.setReservations(reservationMapper
+                .selectReservationAndAccommodationByAccountId(accountId));
+
+        return resp;
+    }
+
     // 예약 정보 등록
     @PostMapping
     @Transactional
-    public ReservationResponse createReservation(@RequestBody @Valid NewReservationRequest nrr, BindingResult bindingResult, @RequestAttribute String tokenId) {
+    public ReservationResponse createReservation(@RequestBody @Valid NewReservationRequest nrr, BindingResult bindingResult,
+                                                 @RequestAttribute String tokenId) {
         ReservationResponse resp = new ReservationResponse();
         resp.setSuccess(false);
 
@@ -88,7 +107,7 @@ public class ReservationController {
                 throw new RuntimeException("Error in insert reservation");
             }
 
-            for (LocalDate d = nrr.getStartDate(); d.isBefore(nrr.getEndDate()) || d.equals(nrr.getEndDate()); d = d.plusDays(1)) {
+            for (LocalDate d = nrr.getStartDate(); d.isBefore(nrr.getEndDate()) ; d = d.plusDays(1)) {
                 r = reservationMapper.insertReservationDate(new ReservationDate(nrr.getAccommodationId(), d));
                 if (r != 1) {
                     throw new RuntimeException("Error in insert reservationDate");
@@ -340,11 +359,11 @@ public class ReservationController {
         }
 
         List<Message> messages = messageMapper.selectMessageByCode(reservationCode);
-        if(messages.isEmpty()){
+        if (messages.isEmpty()) {
             resp.setMessage("message not found");
             return resp;
-        }else{
-            for(Message m : messages){
+        } else {
+            for (Message m : messages) {
                 messageMapper.updateMessageReadFlagById(m.getId());
             }
             resp.setSuccess(true);
