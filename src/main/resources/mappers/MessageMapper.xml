@@ -10,8 +10,12 @@
     <select id="selectMessageByCode" parameterType="string" resultType="Message">
         select * from message where reservation_code=#{reservationCode} order by write_at asc
     </select>
-    <select id="countMessageReadFlagByCode" resultType="int" parameterType="string">
-        select count(*)as cnt from message where reservation_code=#{reservationCode} and read_flag=false;
+    <select id="countMessageReadFlagByCode" resultType="int" parameterType="map">
+        SELECT COUNT(*) AS cnt
+        FROM message
+        WHERE reservation_code = #{reservationCode}
+        AND read_flag = false
+        AND writer_id != #{accountId};
     </select>
     <update id="updateMessageReadFlagById" parameterType="int">
         update message set read_flag=true where id=#{id};

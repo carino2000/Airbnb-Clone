@@ -107,7 +107,7 @@ public class ReservationController {
                 throw new RuntimeException("Error in insert reservation");
             }
 
-            for (LocalDate d = nrr.getStartDate(); d.isBefore(nrr.getEndDate()) ; d = d.plusDays(1)) {
+            for (LocalDate d = nrr.getStartDate(); d.isBefore(nrr.getEndDate()); d = d.plusDays(1)) {
                 r = reservationMapper.insertReservationDate(new ReservationDate(nrr.getAccommodationId(), d));
                 if (r != 1) {
                     throw new RuntimeException("Error in insert reservationDate");
@@ -294,7 +294,7 @@ public class ReservationController {
                     room.setLastMessage(lastMsg.getContent());
                     room.setLastReceiveTime(lastMsg.getWriteAt());
                     room.setUnReadCount(
-                            messageMapper.countMessageReadFlagByCode(reservation.getCode())
+                            messageMapper.countMessageReadFlagByCode(Map.of("reservationCode", reservation.getCode(), "accountId", tokenId))
                     );
                 } else {
                     room.setLastMessage("아직 대화가 없습니다");
@@ -332,7 +332,7 @@ public class ReservationController {
                 room.setLastMessage(lastMsg.getContent());
                 room.setLastReceiveTime(lastMsg.getWriteAt());
                 room.setUnReadCount(
-                        messageMapper.countMessageReadFlagByCode(r.getCode())
+                        messageMapper.countMessageReadFlagByCode(Map.of("reservationCode", r.getCode(), "accountId", tokenId))
                 );
             } else {
                 room.setLastMessage("새로운 대화를 시작해보세요!");
@@ -368,7 +368,9 @@ public class ReservationController {
             return resp;
         } else {
             for (Message m : messages) {
-                messageMapper.updateMessageReadFlagById(m.getId());
+                if (!m.getWriterId().equals(tokenId)) {
+                    messageMapper.updateMessageReadFlagById(m.getId());
+                }
             }
             resp.setSuccess(true);
             resp.setMessage("Message Select Complete");
@@ -443,10 +445,10 @@ public class ReservationController {
         SelectMessagesResponse resp = new SelectMessagesResponse();
         Map<String, String> map = Map.of("accountId", accountId, "reservationCode", reservationCode);
         int n = reviewMapper.countReviewByAccountIdAndCode(map);
-        if(n != 0){
+        if (n != 0) {
             resp.setSuccess(true);
             resp.setMessage("review already created exists");
-        }else{
+        } else {
             resp.setSuccess(false);
             resp.setMessage("review not found");
         }

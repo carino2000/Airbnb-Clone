@@ -12,7 +12,7 @@ public interface MessageMapper {
 
     List<Message> selectMessageByCode(String reservationCode);
 
-    int countMessageReadFlagByCode(String reservationCode);
+    int countMessageReadFlagByCode(Map<String, String> map);
 
     int updateMessageReadFlagById(int id);
 
