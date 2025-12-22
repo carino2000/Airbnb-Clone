@@ -43,8 +43,7 @@ public class AccommodationController {
             @RequestParam(required = false) Integer guests
     ) {
 
-        List<Accommodation> accommodations = accommodationMapper.selectAllAccommodations();
-
+        List<Accommodation> accommodations = accommodationMapper.selectAccommodationsOrderByLikeCount();
 
         // 목적지를 만족하는 데이터 조회
         if (destination != null && !destination.isBlank()) {
@@ -64,7 +63,6 @@ public class AccommodationController {
             List<Accommodation> accommodationsByDuration = accommodationMapper.selectAccommodationsByDuration(checkInDate, checkOutDate);
             accommodations.retainAll(accommodationsByDuration);
         }
-
 
         List<AccommodationDetail> allSelect = new ArrayList<>();
         for (Accommodation accommodation : accommodations) {
@@ -380,17 +378,17 @@ public class AccommodationController {
                 .build();
     }
 
-    // 좋아요 많은 순으로 숙소 목록 반환
-    @GetMapping("/likes/most")
-    public AccommodationMostLikesResponse getAccommodationsOrderByLikeCount() {
-
-        List<Accommodation> rows = accommodationMapper.selectAccommodationsOrderByLikeCount();
-
-        return AccommodationMostLikesResponse.builder()
-                .success(true)
-                .mostLikedAccommodations(rows)
-                .build();
-    }
+//    // 좋아요 많은 순으로 숙소 목록 반환
+//    @GetMapping("/likes/most")
+//    public AccommodationMostLikesResponse getAccommodationsOrderByLikeCount() {
+//
+//        List<Accommodation> rows = accommodationMapper.selectAccommodationsOrderByLikeCount();
+//
+//        return AccommodationMostLikesResponse.builder()
+//                .success(true)
+//                .mostLikedAccommodations(rows)
+//                .build();
+//    }
 
     @GetMapping("/{accountId}/hosting")
     public SelectHostingListResponse getHostingList(@PathVariable String accountId) {

@@ -319,6 +319,10 @@ public class ReservationController {
             Accommodation a =
                     accommodationMapper.selectAccommodationById(r.getAccommodationId());
 
+            if (a == null) {
+                continue;
+            }
+
             MessageRoom room = new MessageRoom();
             room.setReservationCode(r.getCode());
             room.setRecipientId(a.getHostId());
@@ -431,5 +435,21 @@ public class ReservationController {
                 .review(review)
                 .success(true)
                 .build();
+    }
+
+    @GetMapping("review/count")
+    public SelectMessagesResponse getReviewCount(@RequestParam(required = false) String accountId,
+                                                 @RequestParam(required = false) String reservationCode) {
+        SelectMessagesResponse resp = new SelectMessagesResponse();
+        Map<String, String> map = Map.of("accountId", accountId, "reservationCode", reservationCode);
+        int n = reviewMapper.countReviewByAccountIdAndCode(map);
+        if(n != 0){
+            resp.setSuccess(true);
+            resp.setMessage("review already created exists");
+        }else{
+            resp.setSuccess(false);
+            resp.setMessage("review not found");
+        }
+        return resp;
     }
 }

@@ -17,6 +17,10 @@
         where id = #{id}
     </select>
 
+    <select id="countReviewByAccountIdAndCode" parameterType="map">
+        select count(*) from review where account_id=#{accountId} and reservation_code=#{reservationCode};
+    </select>
+
     <select id="selectReviewByAccommodation" parameterType="int" resultType="Review">
         select * from review where accommodation_id=#{accommodationId}
     </select>

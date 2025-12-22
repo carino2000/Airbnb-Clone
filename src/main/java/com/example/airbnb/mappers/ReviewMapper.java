@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface ReviewMapper {
@@ -13,6 +14,8 @@ public interface ReviewMapper {
     int insertReview(Review review);
 
     List<Review> selectReviewByAccommodation(int accommodationId);
+
+    int countReviewByAccountIdAndCode(Map<String, String> map);
 
     // 리뷰 삭제
     int deleteReview(int reviewId);
