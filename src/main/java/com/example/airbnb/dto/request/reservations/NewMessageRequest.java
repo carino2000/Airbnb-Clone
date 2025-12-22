@@ -23,6 +23,7 @@ public class NewMessageRequest {
         message.setWriterId(this.writerId);
         message.setRecipientId(this.recipientId);
         message.setContent(this.content);
+        message.setReadFlag(false);
         return message;
     }
 }
