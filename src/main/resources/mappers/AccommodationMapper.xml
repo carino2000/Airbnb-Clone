@@ -172,11 +172,20 @@
     </select>
 
     <!-- 좋아요 많은 순으로 숙소 목록 반환-->
-    <select id="selectAccommodationsOrderByLikeCount" parameterType="map" resultType="Likes">
-        select accommodation
-        from likes
-        group by accommodation_id
-        order by like_count desc
+    <select id="selectAccommodationsOrderByLikeCount" resultType="Accommodation">
+        SELECT
+        a.*
+        FROM accommodation a
+        LEFT JOIN (
+        SELECT
+        accommodation_id,
+        COUNT(*) AS like_count
+        FROM likes
+        GROUP BY accommodation_id
+        ) lc
+        ON a.id = lc.accommodation_id
+        ORDER BY
+        IFNULL(lc.like_count, 0) DESC;
     </select>
 
 
